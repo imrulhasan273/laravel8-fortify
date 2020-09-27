@@ -47,3 +47,13 @@ Route::view('home', 'home')->middleware('auth');
 ```
 
 ---
+
+---
+
+# **Advanced Laravel**
+
+---
+
+# **Form Request Validation #1**
+
+---

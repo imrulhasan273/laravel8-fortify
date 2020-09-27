@@ -50,80 +50,80 @@
             <div>
                 <h2>Topics</h2>
                 <div class="container">
-                    <button type="button" class="btn btn-primary">Primary</button>
-                    <button type="button" class="btn btn-secondary">Secondary</button>
-                    <button type="button" class="btn btn-success">Success</button>
-                    <button type="button" class="btn btn-danger">Danger</button>
-                    <button type="button" class="btn btn-warning">Warning</button>
-                    <button type="button" class="btn btn-info">Info</button>
-                    <button type="button" class="btn btn-light">Light</button>
-                    <button type="button" class="btn btn-dark">Dark</button>
+                    <a href="{{ route('form.index') }}" type="a" class="btn btn-primary">Form Request Validation</a>
+                    <a type="a" class="btn btn-secondary">Secondary</a>
+                    <a type="a" class="btn btn-success">Success</a>
+                    <a type="a" class="btn btn-danger">Danger</a>
+                    <a type="a" class="btn btn-warning">Warning</a>
+                    <a type="a" class="btn btn-info">Info</a>
+                    <a type="a" class="btn btn-light">Light</a>
+                    <a type="a" class="btn btn-dark">Dark</a>
                 </div>
                 <br/>
                 <div class="container">
-                    <button type="button" class="btn btn-primary">Primary</button>
-                    <button type="button" class="btn btn-secondary">Secondary</button>
-                    <button type="button" class="btn btn-success">Success</button>
-                    <button type="button" class="btn btn-danger">Danger</button>
-                    <button type="button" class="btn btn-warning">Warning</button>
-                    <button type="button" class="btn btn-info">Info</button>
-                    <button type="button" class="btn btn-light">Light</button>
-                    <button type="button" class="btn btn-dark">Dark</button>
+                    <a type="a" class="btn btn-primary">Primary</a>
+                    <a type="a" class="btn btn-secondary">Secondary</a>
+                    <a type="a" class="btn btn-success">Success</a>
+                    <a type="a" class="btn btn-danger">Danger</a>
+                    <a type="a" class="btn btn-warning">Warning</a>
+                    <a type="a" class="btn btn-info">Info</a>
+                    <a type="a" class="btn btn-light">Light</a>
+                    <a type="a" class="btn btn-dark">Dark</a>
                 </div>
                 <br/>
                 <div class="container">
-                    <button type="button" class="btn btn-primary">Primary</button>
-                    <button type="button" class="btn btn-secondary">Secondary</button>
-                    <button type="button" class="btn btn-success">Success</button>
-                    <button type="button" class="btn btn-danger">Danger</button>
-                    <button type="button" class="btn btn-warning">Warning</button>
-                    <button type="button" class="btn btn-info">Info</button>
-                    <button type="button" class="btn btn-light">Light</button>
-                    <button type="button" class="btn btn-dark">Dark</button>
+                    <a type="a" class="btn btn-primary">Primary</a>
+                    <a type="a" class="btn btn-secondary">Secondary</a>
+                    <a type="a" class="btn btn-success">Success</a>
+                    <a type="a" class="btn btn-danger">Danger</a>
+                    <a type="a" class="btn btn-warning">Warning</a>
+                    <a type="a" class="btn btn-info">Info</a>
+                    <a type="a" class="btn btn-light">Light</a>
+                    <a type="a" class="btn btn-dark">Dark</a>
                 </div>
                 <br/>
                 <div class="container">
-                    <button type="button" class="btn btn-primary">Primary</button>
-                    <button type="button" class="btn btn-secondary">Secondary</button>
-                    <button type="button" class="btn btn-success">Success</button>
-                    <button type="button" class="btn btn-danger">Danger</button>
-                    <button type="button" class="btn btn-warning">Warning</button>
-                    <button type="button" class="btn btn-info">Info</button>
-                    <button type="button" class="btn btn-light">Light</button>
-                    <button type="button" class="btn btn-dark">Dark</button>
+                    <a type="a" class="btn btn-primary">Primary</a>
+                    <a type="a" class="btn btn-secondary">Secondary</a>
+                    <a type="a" class="btn btn-success">Success</a>
+                    <a type="a" class="btn btn-danger">Danger</a>
+                    <a type="a" class="btn btn-warning">Warning</a>
+                    <a type="a" class="btn btn-info">Info</a>
+                    <a type="a" class="btn btn-light">Light</a>
+                    <a type="a" class="btn btn-dark">Dark</a>
                 </div>
                 <br/>
                 <div class="container">
-                    <button type="button" class="btn btn-primary">Primary</button>
-                    <button type="button" class="btn btn-secondary">Secondary</button>
-                    <button type="button" class="btn btn-success">Success</button>
-                    <button type="button" class="btn btn-danger">Danger</button>
-                    <button type="button" class="btn btn-warning">Warning</button>
-                    <button type="button" class="btn btn-info">Info</button>
-                    <button type="button" class="btn btn-light">Light</button>
-                    <button type="button" class="btn btn-dark">Dark</button>
+                    <a type="a" class="btn btn-primary">Primary</a>
+                    <a type="a" class="btn btn-secondary">Secondary</a>
+                    <a type="a" class="btn btn-success">Success</a>
+                    <a type="a" class="btn btn-danger">Danger</a>
+                    <a type="a" class="btn btn-warning">Warning</a>
+                    <a type="a" class="btn btn-info">Info</a>
+                    <a type="a" class="btn btn-light">Light</a>
+                    <a type="a" class="btn btn-dark">Dark</a>
                 </div>
                 <br/>
                 <div class="container">
-                    <button type="button" class="btn btn-primary">Primary</button>
-                    <button type="button" class="btn btn-secondary">Secondary</button>
-                    <button type="button" class="btn btn-success">Success</button>
-                    <button type="button" class="btn btn-danger">Danger</button>
-                    <button type="button" class="btn btn-warning">Warning</button>
-                    <button type="button" class="btn btn-info">Info</button>
-                    <button type="button" class="btn btn-light">Light</button>
-                    <button type="button" class="btn btn-dark">Dark</button>
+                    <a type="a" class="btn btn-primary">Primary</a>
+                    <a type="a" class="btn btn-secondary">Secondary</a>
+                    <a type="a" class="btn btn-success">Success</a>
+                    <a type="a" class="btn btn-danger">Danger</a>
+                    <a type="a" class="btn btn-warning">Warning</a>
+                    <a type="a" class="btn btn-info">Info</a>
+                    <a type="a" class="btn btn-light">Light</a>
+                    <a type="a" class="btn btn-dark">Dark</a>
                 </div>
                 <br/>
                 <div class="container">
-                    <button type="button" class="btn btn-primary">Primary</button>
-                    <button type="button" class="btn btn-secondary">Secondary</button>
-                    <button type="button" class="btn btn-success">Success</button>
-                    <button type="button" class="btn btn-danger">Danger</button>
-                    <button type="button" class="btn btn-warning">Warning</button>
-                    <button type="button" class="btn btn-info">Info</button>
-                    <button type="button" class="btn btn-light">Light</button>
-                    <button type="button" class="btn btn-dark">Dark</button>
+                    <a type="a" class="btn btn-primary">Primary</a>
+                    <a type="a" class="btn btn-secondary">Secondary</a>
+                    <a type="a" class="btn btn-success">Success</a>
+                    <a type="a" class="btn btn-danger">Danger</a>
+                    <a type="a" class="btn btn-warning">Warning</a>
+                    <a type="a" class="btn btn-info">Info</a>
+                    <a type="a" class="btn btn-light">Light</a>
+                    <a type="a" class="btn btn-dark">Dark</a>
                 </div>
             </div>
 
