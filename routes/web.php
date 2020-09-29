@@ -12,4 +12,4 @@ Route::view('home', 'home')->middleware('auth');
 
 
 Route::get('/form', [FormController::class, 'index'])->name('form.index');
-Route::get('/form/store', [FormController::class, 'store'])->name('form.store');
+Route::post('/form/store', [FormController::class, 'store'])->name('form.store');

@@ -13,16 +13,23 @@
 
     <!-- Styles -->
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
-    <title>Document</title>
+    <title>Form Request Validation</title>
 </head>
 <body>
     <a style="margin-left:45%; margin-top: 5px;" href="{{ route('welcome') }}" type="button" class="btn btn-dark">Welcome Page</a>
-
+    <h1 style="margin-left:35%; margin-top: 5px;">Form Request Validation</h1>
     <div style="padding-top: 5%; padding-left:30%" class="container">
         <div class="row">
 
             <div class="col-lg-offset-4 col-lg-6">
-                <form action="" method="post">
+
+                @if(count($errors)>0)
+                    @foreach ($errors->all() as $error)
+                        <p class="alert alert-danger">{{ $error }}</p>
+                    @endforeach
+                @endif
+
+                <form  method="post" action="{{ route('form.store') }}" enctype="multipart/form-data">
                     @csrf
                     <div class="form-group">
                         <input class="form-control" type="text" name="name" placeholder="Name"/>
@@ -41,3 +48,4 @@
 
 </body>
 </html>
+
