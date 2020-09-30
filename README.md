@@ -886,3 +886,77 @@ public function index()
 ---
 
 ---
+
+# **Laravel Session**
+
+---
+
+`web.php`
+
+```php
+Route::get('/session/login', function () {
+    if (session()->has('name')) {
+        return view('session.profile');
+    }
+    return view('/session/login');
+})->name('session.login');
+
+Route::post('/session/profile', [SessionController::class, 'userLogin'])->name('session.login.submit');
+
+Route::get('/logout', function () {
+    if (session()->has('name')) {
+        session()->pull('name');
+    }
+    return Redirect::route('session.login');
+});
+```
+
+`SessionController.php`
+
+```php
+    public function userLogin(Request $request)
+    {
+        $data = $request->input();
+        $request->session()->put('name', $data['name']);
+
+        return view('session.profile');
+    }
+```
+
+`login.blade.php`
+
+```php
+<form  method="post" action="{{ route('session.login.submit') }}" enctype="multipart/form-data">
+    @csrf
+    <div class="form-group">
+        <input class="form-control" type="name" name="name" placeholder="Name"/>
+    </div>
+    <div class="form-group">
+        <input class="form-control" type="password" name="password" placeholder="Password"/>
+    </div>
+    <button class="btn btn-success" type="submit" name="submit">Submit</button>
+</form>
+```
+
+`profile.blade.php`
+
+```php
+<div class="row">
+    <div >
+
+        <div>
+        <h1>Hello, {{ session('name') }}</h1>
+        </div>
+
+
+        <a href="/logout" type="a" class="btn btn-light">Log Out</a>
+
+        <br/>
+
+    </div>
+</div>
+```
+
+---
+
+---
