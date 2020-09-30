@@ -764,3 +764,38 @@ One thing about put request is we can not do using this form data, because form 
 ---
 
 ---
+
+# **Search using Rest API**
+
+---
+
+`api.php`
+
+```php
+Route::get('/tasks/search/{title}', [TaskController::class, 'search']);
+```
+
+`TaskController.php`
+
+```php
+public function search($title)
+{
+    $task =  Task::where('title', 'like', '%' . $title . '%')->get();
+
+    return new TaskResource($task);
+}
+```
+
+## Postman Visualize
+
+![](markdowns/19.png)
+
+> Now Search Result Appears.
+
+---
+
+---
+
+# **HTTP Clients**
+
+---

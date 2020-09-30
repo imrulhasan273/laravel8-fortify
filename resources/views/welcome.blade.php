@@ -51,14 +51,15 @@
                 <h2>Topics</h2>
                 <div class="container">
                     <a href="{{ route('form.index') }}" type="a" class="btn btn-primary">Form Request Validation</a>
-                    <a type="a" class="btn btn-secondary">Rest API CRUD</a>
-                    <a type="a" class="btn btn-success">Success</a>
-                    <a type="a" class="btn btn-danger">Danger</a>
-                    <a type="a" class="btn btn-warning">Warning</a>
-                    <a type="a" class="btn btn-info">Info</a>
-                    <a type="a" class="btn btn-light">Light</a>
-                    <a type="a" class="btn btn-dark">Dark</a>
+                    <a href="{{ route('api.index') }}" type="a" class="btn btn-secondary">Rest API CRUD</a>
+                    <a href="" type="a" class="btn btn-success">HTTP Client</a>
+                    <a href="" type="a" class="btn btn-danger">Danger</a>
+                    <a href="" type="a" class="btn btn-warning">Warning</a>
+                    <a href="" type="a" class="btn btn-info">Info</a>
+                    <a href="" type="a" class="btn btn-light">Light</a>
+                    <a href="" type="a" class="btn btn-dark">Dark</a>
                 </div>
+
                 <br/>
                 <div class="container">
                     <a type="a" class="btn btn-primary">Primary</a>

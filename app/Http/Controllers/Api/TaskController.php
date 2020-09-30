@@ -94,4 +94,11 @@ class TaskController extends Controller
 
         return response(['message' => 'Deleted']);
     }
+
+    public function search($title)
+    {
+        $task =  Task::where('title', 'like', '%' . $title . '%')->get();
+
+        return new TaskResource($task);
+    }
 }

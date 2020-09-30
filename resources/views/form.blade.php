@@ -1,23 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <!-- Scripts -->
-    <script src="{{ asset('js/app.js') }}" defer></script>
-
-    <!-- Fonts -->
-    <link rel="dns-prefetch" href="//fonts.gstatic.com">
-    <link href="https://fonts.googleapis.com/css?family=Nunito" rel="stylesheet">
-
-    <!-- Styles -->
-    <link href="{{ asset('css/app.css') }}" rel="stylesheet">
-    <title>Form Request Validation</title>
-</head>
-<body>
-    <a style="margin-left:45%; margin-top: 5px;" href="{{ route('welcome') }}" type="button" class="btn btn-dark">Welcome Page</a>
-    <h1 style="margin-left:35%; margin-top: 5px;">Form Request Validation</h1>
+@extends('layouts.front')
+@section('content')
+<h1 style="margin-left:35%; margin-top: 5px;">Form Request Validation</h1>
     <div style="padding-top: 5%; padding-left:30%" class="container">
         <div class="row">
 
@@ -45,7 +28,4 @@
             </div>
         </div>
     </div>
-
-</body>
-</html>
-
+@endsection
