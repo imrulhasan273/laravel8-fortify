@@ -52,7 +52,7 @@
                 <div class="container">
                     <a href="{{ route('form.index') }}" type="a" class="btn btn-primary">Form Request Validation</a>
                     <a href="{{ route('api.index') }}" type="a" class="btn btn-secondary">Rest API CRUD</a>
-                    <a href="" type="a" class="btn btn-success">HTTP Client</a>
+                    <a href="{{route('api.users.index')}}" type="a" class="btn btn-success">HTTP Client</a>
                     <a href="" type="a" class="btn btn-danger">Danger</a>
                     <a href="" type="a" class="btn btn-warning">Warning</a>
                     <a href="" type="a" class="btn btn-info">Info</a>

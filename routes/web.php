@@ -4,6 +4,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\FormController;
+use App\Http\Controllers\UserController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -17,3 +18,5 @@ Route::post('/form/store', [FormController::class, 'store'])->name('form.store')
 
 
 Route::get('/rest-api', [Controller::class, 'index'])->name('api.index');
+
+Route::get('/users', [UserController::class, 'index'])->name('api.users.index');
