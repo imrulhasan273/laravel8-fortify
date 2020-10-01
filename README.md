@@ -894,6 +894,8 @@ public function index()
 `web.php`
 
 ```php
+
+# Login page appears if he is not loggin in.
 Route::get('/session/login', function () {
     if (session()->has('name')) {
         return view('session.profile');
@@ -901,8 +903,11 @@ Route::get('/session/login', function () {
     return view('/session/login');
 })->name('session.login');
 
+
+# Route for Profile Page
 Route::post('/session/profile', [SessionController::class, 'userLogin'])->name('session.login.submit');
 
+# Route for Logout
 Route::get('/logout', function () {
     if (session()->has('name')) {
         session()->pull('name');
@@ -922,6 +927,8 @@ Route::get('/logout', function () {
         return view('session.profile');
     }
 ```
+
+> set a `key` with name `name` for **session** and set the value of `name` key to value of `$data['name]`.
 
 `login.blade.php`
 
@@ -956,6 +963,643 @@ Route::get('/logout', function () {
     </div>
 </div>
 ```
+
+---
+
+---
+
+---
+
+# **Service Container**
+
+---
+
+Create a new controller
+
+```cmd
+~$ php artisan make:controller PayOrderController
+```
+
+`PayOrderController.php`
+
+```php
+namespace App\Http\Controllers;
+
+use App\Billing\PaymentGateway;
+use Illuminate\Http\Request;
+
+class PayOrderController extends Controller
+{
+    # code ...
+}
+```
+
+-   Create a new Directory named `Billing` inside `app` dir.
+-   Create a new class `PaymentGateway.php` file inside `Billing` dir.
+
+`PaymentGateway.php`
+
+```php
+<?php
+
+namespace App\Billing;
+
+class PaymentGateway
+{
+    //
+}
+
+```
+
+## Gateway
+
+Create a store function on it.
+
+`PaymentGateway.php`
+
+```php
+<?php
+class PaymentGateway
+{
+    public function charge($amount)
+    {
+        return [
+            'amount' => $amount,
+            'confirmation_number' => Str::random(),
+        ]
+    }
+}
+```
+
+## Route
+
+`web.php`
+
+```php
+Route::get('/pay', [PayOrderController::class, 'store'])->name('pay.order');
+```
+
+## Store Function in PayOrderController
+
+`PayOrderController`
+
+```php
+<?php
+class PayOrderController extends Controller
+{
+    public function store()
+    {
+        $paymentGateway = new PaymentGateway();
+        dd($paymentGateway->charge(2500));
+    }
+}
+```
+
+### Output
+
+```php
+array:2 [▼
+  "amount" => 2500
+  "confirmation_number" => "ciOkFxrvCTHQtTaX"
+]
+```
+
+-   we can get rid of this `$paymentGateway = new PaymentGateway();` line al together. We can ask Laravel to go ahead and inject this for us.
+-   Laravel gonna use the `reflection` class. And the basics behind the reflection is that, if you asked somebody to descriibe themselves they would not be able to unless they had a mirror or a reflection of themselves. They could looking at themselves and they could tell you about themselves. SO if they don't have `reflection` they won't know how they look like.
+
+-   Same thing for object. It takes an object and it puts a mirror in front of it so that it can reflect on itself. And conceptually speaking it can tell you a lot about itself.
+
+## Updated Store Function in PayOrderController
+
+`PayOrderController.php`
+
+```php
+class PayOrderController extends Controller
+{
+    public function store(PaymentGateway $paymentGateway)
+    {
+        dd($paymentGateway->charge(2500));
+    }
+}
+```
+
+### Output
+
+```php
+array:2 [▼
+  "amount" => 2500
+  "confirmation_number" => "yU7syFc26QAbbueW"
+]
+```
+
+---
+
+-   What if we need to pass something into `PaymentGateway()` as parameter?
+
+`PaymentGateway.php`
+
+```php
+class PaymentGateway
+{
+    private $currency;
+
+    public function __construct($currency)
+    {
+        $this->currency = $currency;
+    }
+
+    public function charge($amount)
+    {
+        return [
+            'amount' => $amount,
+            'confirmation_number' => Str::random(),
+            'currency' => $this->currency,
+        ];
+    }
+}
+```
+
+`PayOrderController.php`
+
+```php
+class PayOrderController extends Controller
+{
+    public function store()
+    {
+        $paymentGateway = new PaymentGateway('USD');
+
+        dd($paymentGateway->charge(2500));
+    }
+}
+```
+
+### Outputs
+
+```php
+array:3 [▼
+  "amount" => 2500
+  "confirmation_number" => "vgj9p0grClpRLCNr"
+  "currency" => "USD"
+]
+```
+
+---
+
+-   Now how to use `relfection` class with get rid of `$paymentGateway = new PaymentGateway('USD');` in **PayOrderController**.
+
+-   There is no way to use `reflection` direcly.
+
+If we use like below code now...
+
+```php
+class PayOrderController extends Controller
+{
+    public function store(PaymentGateway $paymentGateway)
+    {
+        dd($paymentGateway->charge(2500));
+    }
+}
+```
+
+-   Notice we have no way to pass parameter with it.
+
+### Outputs
+
+> `Illuminate\Contracts\Container\BindingResolutionException Unresolvable dependency resolving [Parameter #0 [ <required> $currency ]] in class App\Billing\PaymentGateway`
+
+-   This is `BindingResolutionException`. Unable to give dependency that I am asking for.
+-   It requires the `currency` parameter.
+-   So what is the solution?
+-   How do we fix that?
+
+## Solution :-> **Service Provider**
+
+-   if we go into `app/providers` there is an `AppServiceProvider`.
+-   `AppServiceProvider` is where your application bootstraps itself of anything that it needs.
+-   In `register()` method.
+
+`AppServiceProvider.php`
+
+```php
+public function register()
+{
+    $this->app->bind(PaymentGateway::class, function ($app) {
+        return new PaymentGateway('USD');
+    });
+}
+```
+
+### Outputs
+
+```php
+array:3 [▼
+  "amount" => 2500
+  "confirmation_number" => "1jwo6C7mxcrc24df"
+  "currency" => "USD"
+]
+```
+
+---
+
+-   So if we have 50 Controller, we don't need to change `usd`. We just can change inside `service provider`.
+
+## Discount into PaymentGateway
+
+-   Create a new Directory named `Orders` inside `app` dir.
+-   Create a new class `OrderDetails.php` file inside `Orders` dir.
+
+`OrderDetails.php`
+
+```php
+<?php
+
+namespace App\Orders;
+
+class OrderDetails
+{
+    # code...
+}
+
+```
+
+---
+
+## **Fanally All the files.....**
+
+`PaymentGateway.php`
+
+```php
+<?php
+
+namespace App\Billing;
+
+use Illuminate\Support\Str;
+
+class PaymentGateway
+{
+    private $currency;
+    private $discount;
+
+    public function __construct($currency)
+    {
+        $this->currency = $currency;
+        $this->discount = 0;
+    }
+
+    public function setDiscount($amount)
+    {
+        $this->discount = $amount;
+    }
+
+    public function charge($amount)
+    {
+        return [
+            'amount' => $amount - $this->discount,
+            'discount' => $this->discount,
+            'confirmation_number' => Str::random(),
+            'currency' => $this->currency,
+        ];
+    }
+}
+```
+
+`OrderDetails.php`
+
+```php
+<?php
+
+namespace App\Orders;
+
+use App\Billing\PaymentGateway;
+
+class OrderDetails
+{
+    private $paymentGateway;
+    public function __construct(PaymentGateway $paymentGateway)
+    {
+        $this->paymentGateway = $paymentGateway;
+    }
+
+    public function all()
+    {
+        $this->paymentGateway->setDiscount(500);
+
+        return [
+            'name' => 'Imrul',
+            'address' => 'Savar, Dhaka'
+        ];
+    }
+}
+```
+
+`PayOrderController.php`
+
+```php
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Billing\PaymentGateway;
+use App\Orders\OrderDetails;
+use Illuminate\Http\Request;
+
+class PayOrderController extends Controller
+{
+    public function store(OrderDetails $orderDetails, PaymentGateway $paymentGateway)
+    {
+        $order = $orderDetails->all();
+        dd($paymentGateway->charge(2500));
+    }
+}
+```
+
+`AppServiceProvider.php`
+
+```php
+public function register()
+{
+    $this->app->bind(PaymentGateway::class, function ($app) {
+        return new PaymentGateway('USD');
+    });
+}
+```
+
+### Outputs
+
+```php
+array:4 [▼
+  "amount" => 2500
+  "discount" => 0
+  "confirmation_number" => "wmaAGtvfHD8qU5hm"
+  "currency" => "USD"
+]
+```
+
+> We can see that discount is not executed.
+
+Do some changes in Service Provider
+
+`AppServiceProvider.php`
+
+```php
+public function register()
+{
+    $this->app->singleton(PaymentGateway::class, function ($app) {
+        return new PaymentGateway('USD');
+    });
+}
+```
+
+### Outpus
+
+```php
+array:4 [▼
+  "amount" => 2000
+  "discount" => 500
+  "confirmation_number" => "yBQEM6fBgaPtfGvf"
+  "currency" => "USD"
+]
+```
+
+> Now discount executed.
+
+## Reason
+
+-   Use bind for **reusable** classes or objects - **the object is constructed each time it is called**. If you need multiple instances of a class, use bind
+
+-   Use singleton for a class or object that you need access to throughout the application - the **object is only constructed once** and so retains state throughout execution. If you only need a single, shared, instance of a class, use singleton
+
+## Flow
+
+-   Inside `PayOrderController` When `OrderDetails` gets created it request a `PaymentGateway`.
+-   Laravel Going to look inside the `Container` to find a `PaymentGateway`
+-   Inside `Container`, it finds the `PaymentGateway` and right here we have instructed a **callback** function to tell the laravel how to actually make up a `PaymentGateway`. So it will actually **invoke** this function and save the results.
+-   Then it will pass them into my `OrderDetails`
+-   Now Again inside `PayOrderController` when 2nd parameter which is `PaymentGateway`.
+-   SO it goes back into the `Container` and says wait a minute, I have already got one of those. So it doesn't run this instead it return the results of the first time that this was invoked.
+-   Then it passes in `PaymentGateway`
+
+---
+
+-   What if I have a Bank Payment and may be a Credit Card Processing Company.
+-   How do I choose one of those two dynamically?
+-   Edit the class to `BankPaymentGateway` from `PaymentGateway`
+
+Create a new **interface** file inside `app/Billing` dir named `PaymentgatewayContract`.
+
+`PaymentGatewayContract.php`
+
+```php
+<?php
+
+namespace App\Billing;
+
+interface PaymentGatewayContract
+{
+    public function setDiscount($amount);
+
+    public function charge($amount);
+}
+```
+
+# **FINALLY - - SERVICE PROVIDER | CONTAINER**
+
+`BankPaymentGateway.php`
+
+```php
+<?php
+
+namespace App\Billing;
+
+use Illuminate\Support\Str;
+
+class BankPaymentGateway implements PaymentGatewayContract
+{
+    private $currency;
+    private $discount;
+
+
+    public function __construct($currency)
+    {
+        $this->currency = $currency;
+        $this->discount = 0;
+    }
+
+    public function setDiscount($amount)
+    {
+        $this->discount = $amount;
+    }
+
+    public function charge($amount)
+    {
+        return [
+            'amount' => $amount - $this->discount,
+            'discount' => $this->discount,
+            'confirmation_number' => Str::random(),
+            'currency' => $this->currency,
+        ];
+    }
+}
+```
+
+`CreditPaymentGateway.php`
+
+```php
+<?php
+
+namespace App\Billing;
+
+use Illuminate\Support\Str;
+
+class CreditPaymentGateway implements PaymentGatewayContract
+{
+    private $currency;
+    private $discount;
+
+
+    public function __construct($currency)
+    {
+        $this->currency = $currency;
+        $this->discount = 0;
+    }
+
+    public function setDiscount($amount)
+    {
+        $this->discount = $amount;
+    }
+
+    public function charge($amount)
+    {
+        $fees =  $amount * 0.03;
+        return [
+            'amount' => $amount - $this->discount + $fees,
+            'discount' => $this->discount,
+            'confirmation_number' => Str::random(),
+            'currency' => $this->currency,
+            'fees' => $fees,
+        ];
+    }
+}
+```
+
+`PaymentGatewayContract.php`
+
+```php
+<?php
+
+namespace App\Billing;
+
+interface PaymentGatewayContract
+{
+    public function setDiscount($amount);
+
+    public function charge($amount);
+}
+```
+
+`OrderDetails.php`
+
+```php
+<?php
+
+namespace App\Orders;
+
+use App\Billing\PaymentGatewayContract;
+
+class OrderDetails
+{
+    private $PaymentGateway;
+    public function __construct(PaymentGatewayContract $PaymentGateway)
+    {
+        $this->PaymentGateway = $PaymentGateway;
+    }
+
+    public function all()
+    {
+        $this->PaymentGateway->setDiscount(500);
+
+        return [
+            'name' => 'Imrul',
+            'address' => 'Savar, Dhaka'
+        ];
+    }
+}
+```
+
+`PayOrderController.php`
+
+```php
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Billing\PaymentGatewayContract;
+use App\Orders\OrderDetails;
+
+class PayOrderController extends Controller
+{
+    public function store(OrderDetails $orderDetails, PaymentGatewayContract $PaymentGateway)
+    {
+        $order = $orderDetails->all();
+        dd($PaymentGateway->charge(2500));
+    }
+}
+```
+
+`AppServiceProvider.php`
+
+```php
+public function register()
+{
+    $this->app->singleton(PaymentGatewayContract::class, function ($app) {
+        if ($_REQUEST['payment'] == "bank") {
+            return new BankPaymentGateway('USD');
+        } else if($_REQUEST['payment'] == "credit") {
+            return new CreditPaymentGateway('USD');
+        }
+    });
+}
+```
+
+`web.php`
+
+```php
+Route::post('/pay', [PayOrderController::class, 'store'])->name('pay.order');
+```
+
+FrontEnd
+
+`index.blade.php`
+
+```php
+<form  method="post" action="{{route('pay.order')}}" enctype="multipart/form-data">
+    @csrf
+    <div class="form-group">
+        <label for="exampleFormControlSelect1">Example select</label>
+        <select name="payment" class="form-control" id="exampleFormControlSelect1">
+          <option value="bank">Bank Payment</option>
+          <option value="credit">Credit Payament</option>
+        </select>
+      </div>
+    <button class="btn btn-success" type="submit" name="submit">Submit</button>
+</form>
+```
+
+### Select Bank Payment Gateway
+
+![](markdowns/22.png)
+
+## Output
+
+![](markdowns/23.png)
+
+### Select Credit Payment Gateway
+
+![](markdowns/24.png)
+
+## Output
+
+![](markdowns/25.png)
 
 ---
 

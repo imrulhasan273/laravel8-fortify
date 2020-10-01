@@ -17,4 +17,9 @@ class Controller extends BaseController
         $tasks = Task::all();
         return view('RestAPI.index', compact('tasks'));
     }
+
+    public function servide_container()
+    {
+        return view('service_provider.index');
+    }
 }

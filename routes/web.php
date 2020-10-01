@@ -4,6 +4,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\FormController;
+use App\Http\Controllers\PayOrderController;
 use App\Http\Controllers\SessionController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Redirect;
@@ -24,7 +25,7 @@ Route::get('/rest-api', [Controller::class, 'index'])->name('api.index');
 Route::get('/users', [UserController::class, 'index'])->name('api.users.index');
 
 
-# Sessions --------------------------------------
+# ----------===========START SESSION==============-------------
 Route::get('/session/login', function () {
     if (session()->has('name')) {
         return view('session.profile');
@@ -40,3 +41,10 @@ Route::get('/logout', function () {
     }
     return Redirect::route('session.login');
 });
+#----------===========END SESSION==============-------------
+
+
+
+Route::get('/service-provider', [Controller::class, 'servide_container'])->name('sc.index');
+
+Route::post('/pay', [PayOrderController::class, 'store'])->name('pay.order');
