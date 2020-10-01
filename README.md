@@ -1564,7 +1564,7 @@ public function register()
 `web.php`
 
 ```php
-Route::post('/pay', [PayOrderController::class, 'store'])->name('pay.order');
+Route::post('/service-provider/pay', [PayOrderController::class, 'store'])->name('pay.order');
 ```
 
 FrontEnd
@@ -1600,6 +1600,257 @@ FrontEnd
 ## Output
 
 ![](markdowns/25.png)
+
+---
+
+---
+
+# **View Composers**
+
+---
+
+```cmd
+~$ php artisan make:model Channel -fmc
+```
+
+Add some data in factory.
+
+`ChannelFactory.php`
+
+```php
+public function definition()
+{
+    return [
+        'name' => $this->faker->word,
+    ];
+}
+```
+
+```cmd
+~$ php artisan tinker
+~$ App\Models\Channel::factory(20)->create()
+```
+
+`web.php`
+
+```php
+Route::get('/channels', [ChannelController::class, 'index'])->name('channed.index');
+```
+
+`ChannelController.php`
+
+```php
+public function index()
+{
+    $channels = Channel::all();
+    return view('view_composer.channel.index', compact('channels'));
+}
+```
+
+`index.blade.php`
+
+```php
+<table class="table">
+    <thead class="thead-dark">
+      <tr>
+        <th scope="col">ID</th>
+        <th scope="col">Name</th>
+      </tr>
+    </thead>
+    <tbody>
+    @foreach ($channels as $channel)
+      <tr>
+        <td>{{$channel->id}}</td>
+        <td>{{$channel->name}}</td>
+      </tr>
+    @endforeach
+    </tbody>
+</table>
+```
+
+> We can now view all the `channel name` with `id` inside the `view`.
+
+## New Concept of Posts
+
+```cmd
+~$ php artisan make:controller PostController
+```
+
+`web.php`
+
+```php
+Route::get('/post/create', [PostController::class, 'create'])->name('post.create');
+```
+
+`PostController.php`
+
+```php
+public function create()
+{
+    $channels = Channel::all();
+
+    return view('view_composer.post.create', compact('channels'));
+}
+```
+
+`create.blade.php`
+
+```php
+<form action="">
+    <select name="channel_id" id="channel_id">
+        @foreach ($channels as $channel)
+            <option value="{{$channel->id}}">{{$channel->name}}</option>
+        @endforeach
+    </select>
+</form>
+```
+
+-   Suppose somebody wants this channel list in alphabetical order for all `views`
+
+`PostController.php`
+
+```php
+public function create()
+{
+    # $channels = Channel::all();
+    $channels = Channel::orderBy('name')->get();    //alphabetical Order
+    return view('view_composer.post.create', compact('channels'));
+}
+```
+
+`ChannelController.php`
+
+```php
+public function index()
+{
+    # $channels = Channel::all();
+    $channels = Channel::orderBy('name')->get();
+    return view('view_composer.channel.index', compact('channels'));
+}
+```
+
+> So we can see that we need to change both two blade file to make the changes.
+
+> So its so painful that just to make the channels in `alphabetical` order, we need to change those `views` where `channels` query is made. In this case we need to change `PostController` and in `ChannelController`.
+
+## Solution --> **View Composer** or **View Share**
+
+---
+
+`ChannelController.php`
+
+```php
+public function index()
+{
+    return view('view_composer.channel.index');
+}
+```
+
+`CreateController.php`
+
+```php
+public function create()
+{
+    return view('view_composer.post.create');
+}
+```
+
+## Method 1 (Using `View Share` Method)
+
+`AppServiceProvider.php`
+
+```php
+public function boot()
+{
+    View::share('channels', Channel::orderBy('name')->get());
+}
+```
+
+-   Here `channels` is the global variable name and 2nd argument is the `Query`.
+-   We can use this variable in whole project in all views.
+
+### This Method is Best or Worst.
+
+-   The boot method is called when every single view is render.
+-   So that means for every single view the `Channel` query will be run.
+-   So performance downgrading.
+-   Also security issue as all the file will know this `variable`.
+
+---
+
+## Method 2 (Using `View Composer` Method)
+
+-   def: We can attach a data to some views.
+
+`AppServiceProvider.php`
+
+```php
+public function boot()
+{
+    View::composer(['view_composer.post.create', 'view_composer.channel.index'], function ($view) {
+        $view->with('channels', Channel::orderBy('name')->get());
+    });
+}
+```
+
+> This method is also called as **Granular Views With Wildcards**
+
+-   Supporse we want to share this `channel` with all the views inside the `post` directory.
+
+```php
+View::composer(['view_composer.post.*', 'view_composer.channel.index'], function ($view) {
+    $view->with('channels', Channel::orderBy('name')->get());
+});
+```
+
+> Using `.*` after `post` dir.
+
+---
+
+## Method 3 (View Composer Method with Clean Code)
+
+Create a new File `app\Http\View\Composers\ChannelsComposer.php`
+
+`ChannelsComposer.php`
+
+```php
+<?php
+
+namespace App\Http\View\Composers;
+
+use App\Models\Channel;
+use Illuminate\View\View;
+
+class ChannelsComposer
+{
+    public function compose(View $view)
+    {
+        $view->with('channels', Channel::orderBy('name')->get());
+    }
+}
+```
+
+> Notice this `View` is from `use Illuminate\View\View;`
+
+`AppServiceProvider.php`
+
+```php
+namespace App\Providers;
+
+use App\Models\Channel;
+use Illuminate\Support\Facades\View;
+use App\Http\View\Composers\ChannelsComposer;
+use Illuminate\Support\ServiceProvider;
+```
+
+```php
+public function boot()
+{
+    View::composer(['view_composer.post.create', 'view_composer.channel.index'], ChannelsComposer::class);
+}
+```
+
+> Notice this `View` is from `use Illuminate\Support\Facades\View;`
 
 ---
 

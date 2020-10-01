@@ -1,10 +1,12 @@
 <?php
 
+use App\Http\Controllers\ChannelController;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\FormController;
 use App\Http\Controllers\PayOrderController;
+use App\Http\Controllers\PostController;
 use App\Http\Controllers\SessionController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Redirect;
@@ -16,11 +18,15 @@ Route::get('/', function () {
 Route::view('home', 'home')->middleware('auth');
 
 
+Route::get('/rest-api', [Controller::class, 'index'])->name('api.index');
+Route::get('/service-provider', [Controller::class, 'servide_container'])->name('sc.index');
+Route::get('/view-composer', [Controller::class, 'view_composer'])->name('vc.index');
+
+
 Route::get('/form', [FormController::class, 'index'])->name('form.index');
 Route::post('/form/store', [FormController::class, 'store'])->name('form.store');
 
 
-Route::get('/rest-api', [Controller::class, 'index'])->name('api.index');
 
 Route::get('/users', [UserController::class, 'index'])->name('api.users.index');
 
@@ -44,7 +50,8 @@ Route::get('/logout', function () {
 #----------===========END SESSION==============-------------
 
 
+Route::post('/service-provider/pay', [PayOrderController::class, 'store'])->name('pay.order');
 
-Route::get('/service-provider', [Controller::class, 'servide_container'])->name('sc.index');
+Route::get('/channels', [ChannelController::class, 'index'])->name('channed.index');
 
-Route::post('/pay', [PayOrderController::class, 'store'])->name('pay.order');
+Route::get('/post/create', [PostController::class, 'create'])->name('post.create');

@@ -21,6 +21,7 @@ class CreditPaymentGateway implements PaymentGatewayContract
         $this->discount = $amount;
     }
 
+
     public function charge($amount)
     {
         $fees =  $amount * 0.03;

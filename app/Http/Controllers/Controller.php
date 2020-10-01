@@ -22,4 +22,9 @@ class Controller extends BaseController
     {
         return view('service_provider.index');
     }
+
+    public function view_composer()
+    {
+        return view('view_composer.index');
+    }
 }
