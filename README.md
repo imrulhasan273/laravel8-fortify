@@ -1855,3 +1855,375 @@ public function boot()
 ---
 
 ---
+
+# **Polymorphic Relationships**
+
+---
+
+```cmd
+~$ php artisan make:model Post -fm
+~$ php artisan make:model Image -m
+```
+
+`posts migration`
+
+```php
+Schema::create('posts', function (Blueprint $table) {
+    $table->id();
+    $table->string('title');
+    $table->text('body');
+    $table->timestamps();
+});
+```
+
+`PostFactory.php`
+
+```php
+public function definition()
+{
+    return [
+        'title' => $this->faker->sentence,
+        'body' => $this->faker->paragraph,
+    ];
+}
+```
+
+-   `image` table is a table which is shared with `users` and `posts`.
+-   So need to have two special columns inside the `images` table in order polymorphysm to work.
+    -   the first column hold the `id` of item that it is associated to.
+        -   if it is for post then column is `post_id`.
+        -   `$table->unsignedBigInteger('post_id');` is not good idea to use
+        -   when this is time for user. its not going to work.
+        -   the `post_id` doen't exist in `users` table.
+        -   So we need to find a sort of term that can apply to just about everything.
+
+`images` table
+
+```php
+Schema::create('images', function (Blueprint $table) {
+    $table->id();
+    $table->string('url');
+    $table->unsignedBigInteger('imageable_id');
+    $table->string('imageable_type');
+    $table->timestamps();
+});
+```
+
+Go to TInker to run factory.
+
+```cmd
+~$ php artisan tinker
+~$ App\Models\Post::factory(1)->create()
+```
+
+Set Up relationship
+
+# Post - Image - User Concept [One to One Relationship]
+
+`Post.php`
+
+```php
+class Post extends Model
+{
+    use HasFactory;
+    protected $guarded = [];
+
+    public function image()
+    {
+        return $this->morphOne(Image::class, 'imageable');
+    }
+}
+```
+
+`Image.php`
+
+```php
+class Image extends Model
+{
+    use HasFactory;
+    protected $guarded = [];
+
+    public function imageable()
+    {
+        return $this->morphTo();
+    }
+}
+```
+
+`User.php`
+
+```php
+public function image()
+{
+    return $this->morphOne(Image::class, 'imageable');
+}
+```
+
+> Here we dont use `post` or `user`. Instead we use `imageable` as function name. Because this function will change between post and user.
+
+## Tinker
+
+### Query 1 [Post]
+
+```php
+$post = Post::first();
+```
+
+### Output
+
+```php
+App\Models\Post {#4295
+     id: 1,
+     title: "Commodi dolorem suscipit aut ullam repellendus natus.",
+     body: "Veritatis molestiae sunt et vero blanditiis autem possimus sed. Aut asperiores aut officia est quaerat in reiciendis. Et aperiam ut assumenda nemo sit dolor id. Suscipit molestiae consequatur modi reiciendis voluptas rerum tenetur.",
+     created_at: "2020-10-01 17:10:41",
+     updated_at: "2020-10-01 17:10:41",
+   }
+```
+
+### Query 2 [Post]
+
+```php
+$post->image()->create(['url'=>'some/image.jpg']);
+```
+
+### Output
+
+```php
+App\Models\Image {#4300
+     url: "some/image.jpg",
+     imageable_id: 1,
+     imageable_type: "App\Models\Post",
+     updated_at: "2020-10-01 17:21:37",
+     created_at: "2020-10-01 17:21:37",
+     id: 1,
+   }
+```
+
+### Database [images]
+
+![](markdowns/26.png)
+
+-   Here we can see `imageable_id` is 1 of table `posts`. So this id belongs to the `Post` model.
+
+## Tinker
+
+### Query 1 [User]
+
+```php
+$user = User::first();
+```
+
+### Output
+
+```php
+App\Models\User {#4296
+     id: 8,
+     name: "Imrul Hasan",
+     email: "imrulhasan273@gmail.com",
+     email_verified_at: null,
+     two_factor_secret: null,
+     two_factor_recovery_codes: null,
+     created_at: "2020-09-29 15:33:49",
+     updated_at: "2020-09-29 15:33:49",
+}
+```
+
+### Query 2 [User]
+
+```php
+$user->image()->create(['url'=>'profile.jpg']);
+```
+
+### Output
+
+```php
+App\Models\Image {#4300
+     url: "profile.jpg",
+     imageable_id: 8,
+     imageable_type: "App\Models\User",
+     updated_at: "2020-10-01 17:38:54",
+     created_at: "2020-10-01 17:38:54",
+     id: 3,
+}
+```
+
+### Database [Image]
+
+![](markdowns/27.png)
+
+-   Here we can see `imageable_id` is 8 of table `users`. So this id belongs to the `User` model.
+-   So this image can not belong to more than one `User`.
+
+---
+
+---
+
+## Comments Concepts [One to Many Relationship]
+
+```cmd
+~$ php artisan make:model Comment -m
+```
+
+`comments` migration
+
+```php
+Schema::create('comments', function (Blueprint $table) {
+    $table->id();
+    $table->unsignedBigInteger('commentable_id');
+    $table->string('commentable_type');
+    $table->timestamps();
+});
+```
+
+`Post.php`
+
+```php
+public function comments()
+{
+    return $this->morphMany(Comment::class, 'commentable');
+}
+```
+
+`Comment.php`
+
+```php
+class Comment extends Model
+{
+    use HasFactory;
+
+    protected $guarded = [];
+
+    public function commentable()
+    {
+        return $this->morphTo();
+    }
+}
+```
+
+```cmd
+~$ php artisan migrate
+```
+
+## Tinker
+
+```cmd
+~$ php artisan tinker
+```
+
+### Query 1 [Post]
+
+```php
+$post = Post::first();
+```
+
+### Output
+
+```php
+App\Models\Post {#4326
+     id: 1,
+     title: "Ea aut quod aut nesciunt nulla sit et.",
+     body: "Aliquam rerum facilis veniam quam. Et ducimus quia facere sed. Id nostrum et cum natus aliquid in nulla beatae.",
+     created_at: "2020-10-01 18:05:33",
+     updated_at: "2020-10-01 18:05:33",
+}
+```
+
+### Query 2 [Post]
+
+```php
+$post->comments()->create(['body'=>'First Cool Comment']);
+```
+
+### Output
+
+```php
+App\Models\Comment {#4288
+     body: "First Cool Comment",
+     commentable_id: 1,
+     commentable_type: "App\Models\Post",
+     updated_at: "2020-10-01 18:11:13",
+     created_at: "2020-10-01 18:11:13",
+     id: 1,
+}
+```
+
+### Database [Comment]
+
+![](markdowns/28.png)
+
+---
+
+## Concept of Videos [One to Many Relationship]
+
+```cmd
+~$ php artisan make:model Video -m
+~$ php artisan migrate
+```
+
+> We don't even need to make any columns for now.
+
+`Video.php`
+
+```php
+class Video extends Model
+{
+    use HasFactory;
+
+    protected $guarded = [];
+
+    public function comments()
+    {
+        return $this->morphMany(Comment::class, 'commentable');
+    }
+}
+```
+
+## Tinker
+
+### Query 1
+
+```php
+$video = Video::first();
+```
+
+### Output
+
+```php
+App\Models\Video {#4295
+     id: 1,
+     created_at: "2020-10-02 00:17:31",
+     updated_at: "2020-10-02 00:17:32",
+}
+```
+
+### Query 2
+
+```php
+$video->comments()->create(['body'=>'First Cool Video Comment']);
+```
+
+### Output
+
+```php
+App\Models\Comment {#4304
+     body: "First Cool Video Comment",
+     commentable_id: 1,
+     commentable_type: "App\Models\Video",
+     updated_at: "2020-10-01 18:26:30",
+     created_at: "2020-10-01 18:26:30",
+     id: 2,
+}
+```
+
+### Database [Comment]
+
+![](markdowns/29.png)
+
+---
+
+---
+
+# Concept of Tags [Many to Many Relationship]
+
+---

@@ -21,6 +21,7 @@ Route::view('home', 'home')->middleware('auth');
 Route::get('/rest-api', [Controller::class, 'index'])->name('api.index');
 Route::get('/service-provider', [Controller::class, 'servide_container'])->name('sc.index');
 Route::get('/view-composer', [Controller::class, 'view_composer'])->name('vc.index');
+Route::get('/polymorphic-relationships', [Controller::class, 'polymorphic_relationships'])->name('pr.index');
 
 
 Route::get('/form', [FormController::class, 'index'])->name('form.index');
@@ -52,6 +53,6 @@ Route::get('/logout', function () {
 
 Route::post('/service-provider/pay', [PayOrderController::class, 'store'])->name('pay.order');
 
-Route::get('/channels', [ChannelController::class, 'index'])->name('channed.index');
 
+Route::get('/channels', [ChannelController::class, 'index'])->name('channed.index');
 Route::get('/post/create', [PostController::class, 'create'])->name('post.create');

@@ -27,4 +27,9 @@ class Controller extends BaseController
     {
         return view('view_composer.index');
     }
+
+    public function polymorphic_relationships()
+    {
+        return view('polymorphic.index');
+    }
 }
