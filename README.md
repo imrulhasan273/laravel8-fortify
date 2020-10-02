@@ -2227,3 +2227,230 @@ App\Models\Comment {#4304
 # Concept of Tags [Many to Many Relationship]
 
 ---
+
+-   When you tag something you are going to have many tags.
+-   A `tag` does not belong to a single entity but a `tag` belong to many entities.
+-   At the same token that entity can have many tags.
+-   Imagine a `post`.
+    -   A `post` can have many many tags like `laravel`, `mysql`, `reactjs`, `elequent` etc.
+        -   `elequent` tags for example in our app could have many `post`.
+            -   So its **Many to Many** relationship.
+
+Creating Tag model with migration and an intermediate table to glue them together with Post.
+
+```cmd
+~$ php artisan make:model Tag -m
+~$ php artisan make:migration creates_taggables_table
+```
+
+`taggables` migration
+
+```php
+Schema::create('taggables', function (Blueprint $table) {
+    $table->unsignedBigInteger('tag_id');
+    $table->unsignedBigInteger('taggable_id');
+    $table->string('taggable_type');
+    $table->timestamps();
+});
+```
+
+`tags` migration
+
+```php
+Schema::create('tags', function (Blueprint $table) {
+    $table->id();
+    $table->string('name');
+    $table->timestamps();
+});
+```
+
+Models
+
+`Post.php`
+
+```php
+public function tags()
+{
+    return $this->morphToMany(Tag::class, 'taggable');
+}
+```
+
+`Tag.php`
+
+```php
+public function posts()
+{
+    return $this->morphedByMany(Post::class, 'taggable');
+}
+```
+
+```cmd
+~$ php artisan migrate
+```
+
+## Tinker
+
+```cmd
+~$ php artisan tinker
+```
+
+### Query 1
+
+```php
+$post = Post::first();
+```
+
+### Output
+
+```php
+App\Models\Post {#4295
+     id: 1,
+     title: "Ea aut quod aut nesciunt nulla sit et.",
+     body: "Aliquam rerum facilis veniam quam. Et ducimus quia facere sed. Id nostrum et cum natus aliquid in nulla beatae.",
+     created_at: "2020-10-01 18:05:33",
+     updated_at: "2020-10-01 18:05:33",
+}
+```
+
+### Query 2
+
+```php
+$post->tags()->create(['name'=>'laravel']);
+```
+
+### Output
+
+```php
+App\Models\Tag {#4290
+     name: "laravel",
+     updated_at: "2020-10-02 16:16:28",
+     created_at: "2020-10-02 16:16:28",
+     id: 1,
+}
+```
+
+### Database
+
+`tags`
+
+![](markdowns/30.png)
+
+`taggables`
+
+![](markdowns/31.png)
+
+### Query 3
+
+```php
+$post->tags()->create(['name'=>'elequent']);
+```
+
+### Output
+
+```php
+App\Models\Tag {#4294
+     name: "elequent",
+     updated_at: "2020-10-02 16:20:12",
+     created_at: "2020-10-02 16:20:12",
+     id: 2,
+}
+```
+
+### Database
+
+`tags`
+
+![](markdowns/32.png)
+
+`taggables`
+
+![](markdowns/33.png)
+
+Now make some relationship for Model
+
+`Video.php` [videos are also taggable]
+
+```php
+public function tags()
+{
+    return $this->morphToMany(Tag::class, 'taggable');
+}
+```
+
+`Tag.php`
+
+```php
+public function videos()
+{
+    return $this->morphedByMany(Video::class, 'taggable');
+}
+```
+
+### Query 1
+
+```php
+$video = Video::first();
+```
+
+### Output
+
+```php
+App\Models\Video {#4295
+     id: 1,
+     created_at: "2020-10-02 00:17:31",
+     updated_at: "2020-10-02 00:17:32",
+}
+```
+
+### Query 2
+
+```php
+$video->tags()->create(['name'=>'php']);
+```
+
+### Output
+
+```php
+App\Models\Tag {#4290
+     name: "php",
+     updated_at: "2020-10-02 16:26:58",
+     created_at: "2020-10-02 16:26:58",
+     id: 3,
+}
+```
+
+### Database
+
+`tags`
+
+![](markdowns/34.png)
+
+`taggables`
+
+![](markdowns/35.png)
+
+---
+
+Lets attach `laravel` to the same video as tag.
+
+### Query 3
+
+```php
+$video->tags()->attach(1);
+```
+
+### Output
+
+```php
+null
+```
+
+### Database
+
+`taggables`
+
+![](markdowns/36.png)
+
+> Now you can see that we have `tag` of `1` and tag of `3` both associated with video with id `1`.
+
+---
