@@ -1,20 +1,21 @@
 <?php
 
 use App\Postcard;
+use Illuminate\Support\Str;
 use App\PostcardSendingService;
-use App\Http\Controllers\Controller;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\FormController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Redirect;
-use App\Http\Controllers\ChannelController;
 
+use App\Http\Controllers\ChannelController;
 use App\Http\Controllers\SessionController;
 use App\Http\Controllers\PayOrderController;
-
+use Illuminate\Support\Facades\Response;
 
 Route::get('/', function () {
     return view('welcome');
@@ -28,6 +29,8 @@ Route::get('/service-provider', [Controller::class, 'servide_container'])->name(
 Route::get('/view-composer', [Controller::class, 'view_composer'])->name('vc.index');
 Route::get('/polymorphic-relationships', [Controller::class, 'polymorphic_relationships'])->name('pr.index');
 Route::get('/facades', [Controller::class, 'facade'])->name('facade.index');
+Route::get('/macros', [Controller::class, 'macros'])->name('macros.index');
+
 
 
 
@@ -76,3 +79,11 @@ Route::get('/post-cards', function () {
 Route::get('/facade_version', function () {
     Postcard::hello('Hello from Coder Tape USA Facade Way!!', 'imrul.cse273@facade.com');
 })->name('postcard.facade');
+
+
+Route::get('/macros/partNumber', function () {
+
+    dd(Str::partNumber('1234567890'));
+    // dd(Str::prefix('1234567890'));
+    // return Response::errorJson();
+})->name('macros.partnumber');

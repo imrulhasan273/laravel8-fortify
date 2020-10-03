@@ -2611,3 +2611,156 @@ The Facade base class makes use of the **\_\_callStatic()** magic-method to defe
 ---
 
 ---
+
+# **Macros**
+
+---
+
+-   whenever a `class` that is using macroable trait, it inherits two methods
+    -   1. **macro** function
+    -   2. **mixin** function
+-   whenever any static function is called on the particular class that is using this macroable traits, as we learned in the previous lesson about facade, anything that doesn't exist will fall back to the magic method of PHP called `__callStatic`,
+
+## Way 1
+
+`AppServiceProvider.php`
+
+```php
+public function boot()
+{
+    # This is a macro
+    Str::macro('partNumber', function ($part) {
+        return 'AB-' . substr($part, 0, 3) . '-' . substr($part, 3);
+    });
+}
+```
+
+`web.php`
+
+```php
+Route::get('/macros/partNumber', function () {
+    dd(Str::partNumber('1234567890'));
+})->name('macros.partnumber');
+```
+
+### Output
+
+```php
+"AB-123-4567890"
+```
+
+---
+
+## Way 2
+
+`App\Mixins\StrMixins.php`
+
+```php
+<?php
+
+namespace App\Mixins;
+
+class StrMixins
+{
+    public function partNumber()
+    {
+        return function ($part) {
+            return 'AB-' . substr($part, 0, 3) . '-' . substr($part, 3);
+        };
+    }
+
+    public function prefix()
+    {
+        return function ($string, $prefix = 'AB-') {
+            return $prefix . $string;
+        };
+    }
+}
+```
+
+`AppServiceProvider.php`
+
+```php
+public function boot()
+{
+    Str::mixin(new StrMixins, true);
+}
+```
+
+`web.php`
+
+```php
+Route::get('/macros/partNumber', function () {
+    dd(Str::partNumber('1234567890'));
+})->name('macros.partnumber');
+```
+
+### Output
+
+```php
+"AB-123-4567890"
+```
+
+`web.php`
+
+```php
+Route::get('/macros/partNumber', function () {
+    dd(Str::prefix('1234567890'));
+})->name('macros.partnumber');
+```
+
+### Output
+
+```php
+"AB-1234567890"
+```
+
+---
+
+## Macros and Mxing Conflict? Who wins?
+
+`web.php`
+
+```php
+Route::get('/macros/partNumber', function () {
+    dd(Str::partNumber('1234567890'));
+})->name('macros.partnumber');
+```
+
+`AppServiceProvider.php`
+
+```php
+public function boot()
+{
+    Str::macro('partNumber', function ($part) {
+        return 'AB-' . substr($part, 0, 3) . '-' . substr($part, 3);
+    });
+
+    Str::mixin(new StrMixins, true);
+}
+```
+
+-   So here We can see that `partNumber` get called using `macros`. in line **3**.
+-   `partNumber` is again called in line **7** using `mixin` and overwrite the previous return values.
+-   So how to restrict from overwriting if it already got called before?
+
+### Solution
+
+`AppServiceProvider.php`
+
+```php
+public function boot()
+{
+    Str::macro('partNumber', function ($part) {
+        return 'AB-' . substr($part, 0, 3) . '-' . substr($part, 3);
+    });
+
+    Str::mixin(new StrMixins, false);
+}
+```
+
+-   Pass `false` as second arg to the `mixin`.
+
+---
+
+---

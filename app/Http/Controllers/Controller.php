@@ -38,8 +38,8 @@ class Controller extends BaseController
         return view('facade.index');
     }
 
-    public function facade_version()
+    public function macros()
     {
-        dd('dddd');
+        return view('macros.index');
     }
 }

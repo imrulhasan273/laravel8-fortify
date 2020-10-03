@@ -62,69 +62,69 @@
 
                 <br/>
                 <div class="container">
-                    <a type="a" class="btn btn-primary">Primary</a>
-                    <a type="a" class="btn btn-secondary">Secondary</a>
-                    <a type="a" class="btn btn-success">Success</a>
-                    <a type="a" class="btn btn-danger">Danger</a>
-                    <a type="a" class="btn btn-warning">Warning</a>
-                    <a type="a" class="btn btn-info">Info</a>
-                    <a type="a" class="btn btn-light">Light</a>
-                    <a type="a" class="btn btn-dark">Dark</a>
+                    <a href="{{route('macros.index')}}" type="a" class="btn btn-primary">Macros</a>
+                    <a href="" type="a" class="btn btn-secondary">Secondary</a>
+                    <a  href="" type="a" class="btn btn-success">Success</a>
+                    <a  href="" type="a" class="btn btn-danger">Danger</a>
+                    <a  href="" type="a" class="btn btn-warning">Warning</a>
+                    <a  href="" type="a" class="btn btn-info">Info</a>
+                    <a  href="" type="a" class="btn btn-light">Light</a>
+                    <a  href="" type="a" class="btn btn-dark">Dark</a>
                 </div>
                 <br/>
                 <div class="container">
-                    <a type="a" class="btn btn-primary">Primary</a>
-                    <a type="a" class="btn btn-secondary">Secondary</a>
-                    <a type="a" class="btn btn-success">Success</a>
-                    <a type="a" class="btn btn-danger">Danger</a>
-                    <a type="a" class="btn btn-warning">Warning</a>
-                    <a type="a" class="btn btn-info">Info</a>
-                    <a type="a" class="btn btn-light">Light</a>
-                    <a type="a" class="btn btn-dark">Dark</a>
+                    <a href="" type="a" class="btn btn-primary">Primary</a>
+                    <a href="" type="a" class="btn btn-secondary">Secondary</a>
+                    <a href="" type="a" class="btn btn-success">Success</a>
+                    <a href="" type="a" class="btn btn-danger">Danger</a>
+                    <a href="" type="a" class="btn btn-warning">Warning</a>
+                    <a href="" type="a" class="btn btn-info">Info</a>
+                    <a href="" type="a" class="btn btn-light">Light</a>
+                    <a href="" type="a" class="btn btn-dark">Dark</a>
                 </div>
                 <br/>
                 <div class="container">
-                    <a type="a" class="btn btn-primary">Primary</a>
-                    <a type="a" class="btn btn-secondary">Secondary</a>
-                    <a type="a" class="btn btn-success">Success</a>
-                    <a type="a" class="btn btn-danger">Danger</a>
-                    <a type="a" class="btn btn-warning">Warning</a>
-                    <a type="a" class="btn btn-info">Info</a>
-                    <a type="a" class="btn btn-light">Light</a>
-                    <a type="a" class="btn btn-dark">Dark</a>
+                    <a href="" type="a" class="btn btn-primary">Primary</a>
+                    <a href="" type="a" class="btn btn-secondary">Secondary</a>
+                    <a href="" type="a" class="btn btn-success">Success</a>
+                    <a href="" type="a" class="btn btn-danger">Danger</a>
+                    <a href="" type="a" class="btn btn-warning">Warning</a>
+                    <a href="" type="a" class="btn btn-info">Info</a>
+                    <a href="" type="a" class="btn btn-light">Light</a>
+                    <a href="" type="a" class="btn btn-dark">Dark</a>
                 </div>
                 <br/>
                 <div class="container">
-                    <a type="a" class="btn btn-primary">Primary</a>
-                    <a type="a" class="btn btn-secondary">Secondary</a>
-                    <a type="a" class="btn btn-success">Success</a>
-                    <a type="a" class="btn btn-danger">Danger</a>
-                    <a type="a" class="btn btn-warning">Warning</a>
-                    <a type="a" class="btn btn-info">Info</a>
-                    <a type="a" class="btn btn-light">Light</a>
-                    <a type="a" class="btn btn-dark">Dark</a>
+                    <a href="" type="a" class="btn btn-primary">Primary</a>
+                    <a href="" type="a" class="btn btn-secondary">Secondary</a>
+                    <a href="" type="a" class="btn btn-success">Success</a>
+                    <a href="" type="a" class="btn btn-danger">Danger</a>
+                    <a href="" type="a" class="btn btn-warning">Warning</a>
+                    <a href="" type="a" class="btn btn-info">Info</a>
+                    <a href="" type="a" class="btn btn-light">Light</a>
+                    <a href="" type="a" class="btn btn-dark">Dark</a>
                 </div>
                 <br/>
                 <div class="container">
-                    <a type="a" class="btn btn-primary">Primary</a>
-                    <a type="a" class="btn btn-secondary">Secondary</a>
-                    <a type="a" class="btn btn-success">Success</a>
-                    <a type="a" class="btn btn-danger">Danger</a>
-                    <a type="a" class="btn btn-warning">Warning</a>
-                    <a type="a" class="btn btn-info">Info</a>
-                    <a type="a" class="btn btn-light">Light</a>
-                    <a type="a" class="btn btn-dark">Dark</a>
+                    <a href="" type="a" class="btn btn-primary">Primary</a>
+                    <a href="" type="a" class="btn btn-secondary">Secondary</a>
+                    <a href="" type="a" class="btn btn-success">Success</a>
+                    <a href="" type="a" class="btn btn-danger">Danger</a>
+                    <a href="" type="a" class="btn btn-warning">Warning</a>
+                    <a href="" type="a" class="btn btn-info">Info</a>
+                    <a href="" type="a" class="btn btn-light">Light</a>
+                    <a href="" type="a" class="btn btn-dark">Dark</a>
                 </div>
                 <br/>
                 <div class="container">
-                    <a type="a" class="btn btn-primary">Primary</a>
-                    <a type="a" class="btn btn-secondary">Secondary</a>
-                    <a type="a" class="btn btn-success">Success</a>
-                    <a type="a" class="btn btn-danger">Danger</a>
-                    <a type="a" class="btn btn-warning">Warning</a>
-                    <a type="a" class="btn btn-info">Info</a>
-                    <a type="a" class="btn btn-light">Light</a>
-                    <a type="a" class="btn btn-dark">Dark</a>
+                    <a href="" type="a" class="btn btn-primary">Primary</a>
+                    <a href="" type="a" class="btn btn-secondary">Secondary</a>
+                    <a href="" type="a" class="btn btn-success">Success</a>
+                    <a href="" type="a" class="btn btn-danger">Danger</a>
+                    <a href="" type="a" class="btn btn-warning">Warning</a>
+                    <a href="" type="a" class="btn btn-info">Info</a>
+                    <a href="" type="a" class="btn btn-light">Light</a>
+                    <a href="" type="a" class="btn btn-dark">Dark</a>
                 </div>
             </div>
 
