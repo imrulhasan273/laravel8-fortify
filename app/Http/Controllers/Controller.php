@@ -32,4 +32,14 @@ class Controller extends BaseController
     {
         return view('polymorphic.index');
     }
+
+    public function facade()
+    {
+        return view('facade.index');
+    }
+
+    public function facade_version()
+    {
+        dd('dddd');
+    }
 }

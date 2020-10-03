@@ -1,27 +1,34 @@
 <?php
 
-use App\Http\Controllers\ChannelController;
+use App\Postcard;
+use App\PostcardSendingService;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Route;
 
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\FormController;
-use App\Http\Controllers\PayOrderController;
 use App\Http\Controllers\PostController;
-use App\Http\Controllers\SessionController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Redirect;
+use App\Http\Controllers\ChannelController;
+
+use App\Http\Controllers\SessionController;
+use App\Http\Controllers\PayOrderController;
+
 
 Route::get('/', function () {
     return view('welcome');
 })->name('welcome');
 
-Route::view('home', 'home')->middleware('auth');
+Route::view('/home', 'home')->middleware('auth');
 
 
 Route::get('/rest-api', [Controller::class, 'index'])->name('api.index');
 Route::get('/service-provider', [Controller::class, 'servide_container'])->name('sc.index');
 Route::get('/view-composer', [Controller::class, 'view_composer'])->name('vc.index');
 Route::get('/polymorphic-relationships', [Controller::class, 'polymorphic_relationships'])->name('pr.index');
+Route::get('/facades', [Controller::class, 'facade'])->name('facade.index');
+
 
 
 Route::get('/form', [FormController::class, 'index'])->name('form.index');
@@ -56,3 +63,16 @@ Route::post('/service-provider/pay', [PayOrderController::class, 'store'])->name
 
 Route::get('/channels', [ChannelController::class, 'index'])->name('channed.index');
 Route::get('/post/create', [PostController::class, 'create'])->name('post.create');
+
+
+
+## --- post card --- facades
+Route::get('/post-cards', function () {
+    $postcardService = new PostcardSendingService('USA', 4, 6);
+    $postcardService->hello('Hello from Coder Tape USA!!', 'imrul.cse273@gmail.com');
+})->name('postcard.index');
+
+
+Route::get('/facade_version', function () {
+    Postcard::hello('Hello from Coder Tape USA Facade Way!!', 'imrul.cse273@facade.com');
+})->name('postcard.facade');

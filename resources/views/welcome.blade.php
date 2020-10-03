@@ -57,7 +57,7 @@
                     <a href="{{route('sc.index')}}" type="a" class="btn btn-warning">Service Container</a>
                     <a href="{{route('vc.index')}}" type="a" class="btn btn-info">View Composers</a>
                     <a href="{{route('pr.index')}}" type="a" class="btn btn-light">Polymorphic Relationships</a>
-                    <a href="" type="a" class="btn btn-dark">Dark</a>
+                    <a href="{{route('facade.index')}}" type="a" class="btn btn-dark">Facades</a>
                 </div>
 
                 <br/>

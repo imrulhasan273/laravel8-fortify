@@ -2454,3 +2454,160 @@ null
 > Now you can see that we have `tag` of `1` and tag of `3` both associated with video with id `1`.
 
 ---
+
+---
+
+## **Facades**
+
+---
+
+## Configure mailing setup
+
+`.env`
+
+```php
+MAIL_MAILER=smtp
+MAIL_HOST=smtp.mailtrap.io
+MAIL_PORT=2525
+MAIL_USERNAME=52cf0d921a8067
+MAIL_PASSWORD=a25e11ca412af2
+MAIL_ENCRYPTION=tls
+MAIL_FROM_ADDRESS=imrulhasan273@gmail.com
+MAIL_FROM_NAME="${APP_NAME}"
+```
+
+Please run these below command to get effect
+
+```php
+php artisan config:clear
+php artisan view:clear
+php artisan cache:clear
+php artisan route:cache
+php artisan route:clear
+```
+
+## Idea: Postcard Sending Service
+
+Create a file `App\PostcardSendingService.php`
+
+### Step 1
+
+`App\PostcardSendingService.php`
+
+```php
+<?php
+
+namespace App;
+
+use Illuminate\Support\Facades\Mail;
+
+class PostcardSendingService
+{
+    private $country;
+    private $width;
+    private $height;
+
+    public function __construct($country, $width, $height)
+    {
+        $this->country = $country;
+        $this->height = $height;
+        $this->width = $width;
+    }
+
+    public function hello($message, $email)
+    {
+        Mail::raw($message, function ($message) use ($email) {
+            $message->to($email);
+        });
+
+        # Mail out postcard through some service
+        # $this->country, $this->width, $this->height
+
+        dump('Postcard was sent with the message: ' . $message);
+    }
+}
+```
+
+## Normal Way [Without Facade]
+
+### Step 2 [final step]
+
+`web.php`
+
+```php
+Route::get('/post-cards', function () {
+    $postcardService = new PostcardSendingService('USA', 4, 6);
+    $postcardService->hello('Hello from Coder Tape USA', 'imrul.cse273@gmail.com');
+})->name('postcard.index');
+```
+
+## Facade Way [using Facade]
+
+### Step 2
+
+`AppServiceProvider.php`
+
+```php
+public function boot()
+{
+    $this->app->singleton('Postcard', function ($app) {
+        return new PostcardSendingService('USA', 4, 6);
+    });
+}
+```
+
+-   The `singleton` is referenced by a string `Postcard`
+
+### Step 3
+
+`App\Postcard.php`
+
+```php
+<?php
+
+namespace App;
+
+class Postcard
+{
+    protected static function resolveFacade($name)
+    {
+        return app()[$name];
+    }
+
+    public static function __callStatic($method, $args)
+    {
+        return (self::resolveFacade('Postcard'))->$method(...$args);
+    }
+}
+```
+
+-   here `$method` is `hello` and the `$args` is the two string with `message` and `email`
+
+### Step 4 [final step]
+
+`web.php`
+
+```php
+Route::get('/facade_version', function () {
+    Postcard::hello('Hello from Coder Tape USA Facade Way!!', 'imrul.cse273@facade.com');
+})->name('postcard.facade');
+```
+
+> `Postcard::hello` facade way of calling.
+
+-   We are calling `hello` function at the end from `PostcardSendingService.php` file.
+-   we can see that the `hello` function is a real function and its not a static function.
+-   But at the start of the process to grab the functionality using **facade** we call it statically using `Postcard::hello`. Here we see that `hello` function is called statically. But behind the scene the real `hello` function is called using `real funtion`.
+-   So finally **facade** looks like a static function but not exucute in a static way. Its the magic of **facade**.
+
+## How facade works
+
+> In a Laravel application, a facade is a class that provides access to an object from the container. The machinery that makes this work is in the Facade class. Laravel's facades, and any custom facades you create, will extend the base `Illuminate\Support\Facades\Facade class`.
+
+The Facade base class makes use of the **\_\_callStatic()** magic-method to defer calls from your facade to an object resolved from the container
+
+## To know more [Docx:facade](https://laravel.com/docs/8.x/facades#introduction)
+
+---
+
+---
