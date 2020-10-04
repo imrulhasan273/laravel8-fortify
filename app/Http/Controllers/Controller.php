@@ -42,4 +42,9 @@ class Controller extends BaseController
     {
         return view('macros.index');
     }
+
+    public function pipe()
+    {
+        return view('pipeline.index');
+    }
 }

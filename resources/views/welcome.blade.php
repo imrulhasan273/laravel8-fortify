@@ -63,7 +63,7 @@
                 <br/>
                 <div class="container">
                     <a href="{{route('macros.index')}}" type="a" class="btn btn-primary">Macros</a>
-                    <a href="" type="a" class="btn btn-secondary">Secondary</a>
+                    <a href="{{route('pipe.index')}}" type="a" class="btn btn-secondary">Pipeline</a>
                     <a  href="" type="a" class="btn btn-success">Success</a>
                     <a  href="" type="a" class="btn btn-danger">Danger</a>
                     <a  href="" type="a" class="btn btn-warning">Warning</a>

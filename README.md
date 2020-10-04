@@ -2764,3 +2764,458 @@ public function boot()
 ---
 
 ---
+
+# **Pipeline**
+
+---
+
+## Introduction
+
+> Pipeline is a design pattern specifically optimized to handle stepped changes to an object. Think of an assembly line, where each step is a pipe and by the end of the line, you have your transformed object. Let's implement a filtering functionality using the pipeline pattern and Laravel.
+
+-   [Design Pattern](https://www.youtube.com/redirect?event=video_description&v=7XqEJO-wt7s&q=https%3A%2F%2Fwww.cise.ufl.edu%2Fresearch%2FParallelPatterns%2FPatternLanguage%2FAlgorithmStructure%2FPipeline.htm&redir_token=QUFFLUhqa0RhSHJOQzFmZWtqVk43cjQ2UkFoZFY1b3h0QXxBQ3Jtc0tsbXIxRjN4SDlIRnlxZmYwZ1dUUGtXUWhBRVkwZUc1MjlDRGQ0MVdxdXg4TVJ5MHhTZjRSa21adHpmSlVDaHFFanpjLWlFdF9rb0hJRkRTUWliUVZ0a3ZmQmxISndzRXBfbTZ5V1BLUmRFV2tNeEkwOA%3D%3D)
+
+---
+
+`blogs` migration
+
+```php
+Schema::create('blogs', function (Blueprint $table) {
+    $table->id();
+    $table->string('title');
+    $table->unsignedSmallInteger('active');
+    $table->timestamps();
+});
+```
+
+`BlogFactory.php`
+
+```php
+public function definition()
+{
+    return [
+        'title' => $this->faker->sentence(2),
+        'active' => random_int(0, 1),
+    ];
+}
+```
+
+Now run the Seeder [We don't use DataBase Seeder now.]
+
+```cmd
+~$ php artisan tinker
+~$ App\Models\Blog::factory(50)->create()
+```
+
+`web.php`
+
+```php
+Route::get('/blogs', [BlogController::class, 'index'])->name('blogs.index');
+```
+
+`BlogController.php`
+
+```php
+public function index()
+{
+    $blogs = Blog::all();
+    return view('pipeline.blog.index', compact('blogs'));
+}
+```
+
+`index.blade.php`
+
+```php
+<table class="table">
+    <thead class="thead-dark">
+      <tr>
+        <th scope="col">Is Active</th>
+        <th scope="col">Title</th>
+      </tr>
+    </thead>
+    <tbody>
+    @foreach ($blogs as $blog)
+        <tr>
+            <td>{{$blog->active}}</td>
+            <td>{{$blog->title}}</td>
+        </tr>
+    @endforeach
+    </tbody>
+</table>
+```
+
+### Address Bar
+
+After adding `?active=1` after the url
+
+```php
+http://127.0.0.1:8000/blogs?active=1
+```
+
+### Output
+
+![](markdowns/37.png)
+
+-   no changes.
+-   Only active Blog post should be appear.
+
+---
+
+## Solution
+
+`BlogController.php`
+
+```php
+    public function index()
+    {
+        $blogs = Blog::query();
+
+        if (request()->has('active')) {
+            $blogs->where('active', request('active'));
+        }
+
+        $blogs = $blogs->get();
+
+        return view('pipeline.blog.index', compact('blogs'));
+    }
+```
+
+### Address Bar
+
+After adding `?active=1` after the url
+
+```php
+http://127.0.0.1:8000/blogs?active=1
+```
+
+### Output
+
+![](markdowns/38.png)
+
+---
+
+## Sort by title?
+
+`BlogController.php`
+
+```php
+    public function index()
+    {
+        $blogs = Blog::query();
+
+        # Active Query
+        if (request()->has('active')) {
+            $blogs->where('active', request('active'));
+        }
+
+        # Sort Query
+        if (request()->has('sort')) {
+            $blogs->orderBy('title', request('sort'));
+        }
+
+        $blogs = $blogs->get();
+
+        return view('pipeline.blog.index', compact('blogs'));
+    }
+```
+
+```php
+http://127.0.0.1:8000/blogs?active=1&sort=asc
+```
+
+### Output
+
+![](markdowns/39.png)
+
+---
+
+## Now Refactoring The Code Using Pipeline
+
+Create some Query Filters in `App\QueryFilters` directory
+
+`App\QueryFilters\Active.php`
+
+```php
+<?php
+
+namespace App\QueryFilters;
+
+use Closure;
+
+class Active
+{
+    public function handle($request, Closure $next)
+    {
+        if (!request()->has('active')) {
+            return $next($request);
+        }
+
+        $builder = $next($request);
+
+        return $builder->where('active', request('active'));
+    }
+}
+```
+
+`App\QueryFilters\Sort.php`
+
+```php
+<?php
+
+namespace App\QueryFilters;
+
+use Closure;
+
+class Sort
+{
+    public function handle($request, Closure $next)
+    {
+        if (!request()->has('sort')) {
+            return $next($request);
+        }
+
+        $builder = $next($request);
+
+        return $builder->orderBy('title', request('sort'));
+    }
+}
+```
+
+`BlogController.php`
+
+```php
+namespace App\Http\Controllers;
+
+use App\Models\Blog;
+use App\QueryFilters\Sort;
+use App\QueryFilters\Active;
+use Illuminate\Http\Request;
+use Illuminate\Pipeline\Pipeline;
+```
+
+```php
+public function index()
+{
+    $blogs = app(Pipeline::class)->send(Blog::query())->through([
+        Active::class,
+        Sort::class,
+    ])->thenReturn()->get();
+
+    return view('pipeline.blog.index', compact('blogs'));
+}
+```
+
+```php
+http://127.0.0.1:8000/blogs?active=1&sort=asc
+```
+
+### Output
+
+![](markdowns/39.png)
+
+---
+
+## Make these code even more cleaner
+
+`Filter.php`
+
+```php
+<?php
+
+namespace App\QueryFilters;
+
+use Closure;
+use Illuminate\Support\Str;
+
+abstract class Filter
+{
+    public function handle($request, Closure $next)
+    {
+        if (!request()->has($this->filterName())) {
+            return $next($request);
+        }
+
+        $builder = $next($request);
+
+        return $this->applyFilter($builder);
+    }
+
+    protected abstract function applyFilter($builder);
+
+    protected function filterName()
+    {
+        return Str::snake(class_basename($this));
+    }
+}
+
+```
+
+-   Here `class_basename($this)` returns the **Base Class Name**. Here Base Class name can be `Active`, `Sort` or `MaxCount`.
+
+`Active.php`
+
+```php
+<?php
+
+namespace App\QueryFilters;
+
+class Active extends Filter
+{
+    protected function applyFilter($builder)
+    {
+        return $builder->where('active', request($this->filterName()));
+    }
+}
+```
+
+`Sort.php`
+
+```php
+<?php
+
+namespace App\QueryFilters;
+
+class Sort extends Filter
+{
+    protected function applyFilter($builder)
+    {
+        return $builder->orderBy('title', request($this->filterName()));
+    }
+}
+```
+
+`MaxCount.php`
+
+```php
+<?php
+
+namespace App\QueryFilters;
+
+class MaxCount extends Filter
+{
+    protected function applyFilter($builder)
+    {
+        return $builder->take(request($this->filterName()));
+    }
+}
+```
+
+`BlogController.php`
+
+```php
+public function index()
+{
+    $blogs = app(Pipeline::class)->send(Blog::query())->through([
+        Active::class,
+        Sort::class,
+        MaxCount::class,
+    ])->thenReturn()->get();
+
+    return view('pipeline.blog.index', compact('blogs'));
+}
+```
+
+## Outputs same as before
+
+![](markdowns/41.png)
+
+---
+
+## We can clean the controller even more
+
+Move the logical part from **Controller** to **Model**
+
+`Blog.php`
+
+```php
+<?php
+namespace App\Models;
+
+use App\QueryFilters\Sort;
+use App\QueryFilters\Active;
+use App\QueryFilters\MaxCount;
+use Illuminate\Pipeline\Pipeline;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+
+class Blog extends Model
+{
+    use HasFactory;
+
+    public static function allBlogPost()
+    {
+        return $blogs = app(Pipeline::class)
+            ->send(Blog::query())
+            ->through([
+                Active::class,
+                Sort::class,
+                MaxCount::class,
+            ])->thenReturn()
+            ->get();
+    }
+}
+```
+
+`BlogController.php`
+
+```php
+public function index()
+{
+    $blogs = Blog::allBlogPost();
+    return view('pipeline.blog.index', compact('blogs'));
+}
+```
+
+---
+
+## How to paginate instead of get all?
+
+`Blog.php`
+
+```php
+public static function allBlogPost()
+{
+    return $blogs = app(Pipeline::class)
+        ->send(Blog::query())
+        ->through([
+            Active::class,
+            Sort::class,
+            MaxCount::class,
+        ])->thenReturn()
+        ->paginate(5);
+}
+```
+
+-   Per page contains `5` blog post.
+
+`index.blade.php`
+
+```php
+<table class="table">
+    <thead class="thead-dark">
+      <tr>
+        <th scope="col">Is Active</th>
+        <th scope="col">Title</th>
+      </tr>
+    </thead>
+    <tbody>
+    @foreach ($blogs as $blog)
+        <tr>
+            <td>{{$blog->active}}</td>
+            <td>{{$blog->title}}</td>
+        </tr>
+    @endforeach
+    </tbody>
+</table>
+{{ $blogs->appends(request()->input())->links('pagination::bootstrap-4') }}
+```
+
+-   Here is the `pagination linking` with bootstrap design
+
+### Output
+
+![](markdowns/42.png)
+
+---
+
+---

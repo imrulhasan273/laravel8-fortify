@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\BlogController;
 use App\Postcard;
 use Illuminate\Support\Str;
 use App\PostcardSendingService;
@@ -30,6 +31,8 @@ Route::get('/view-composer', [Controller::class, 'view_composer'])->name('vc.ind
 Route::get('/polymorphic-relationships', [Controller::class, 'polymorphic_relationships'])->name('pr.index');
 Route::get('/facades', [Controller::class, 'facade'])->name('facade.index');
 Route::get('/macros', [Controller::class, 'macros'])->name('macros.index');
+Route::get('/pipeline', [Controller::class, 'pipe'])->name('pipe.index');
+
 
 
 
@@ -82,8 +85,13 @@ Route::get('/facade_version', function () {
 
 
 Route::get('/macros/partNumber', function () {
-
     dd(Str::partNumber('1234567890'));
-    // dd(Str::prefix('1234567890'));
-    // return Response::errorJson();
 })->name('macros.partnumber');
+
+Route::get('/macros/mixin', function () {
+    dd(Str::prefix('1234567890'));
+})->name('macros.mixin');
+
+# -- - - -- - - -
+
+Route::get('/blogs', [BlogController::class, 'index'])->name('blogs.index');
