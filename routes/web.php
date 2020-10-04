@@ -14,6 +14,7 @@ use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Redirect;
 
 use App\Http\Controllers\ChannelController;
+use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\SessionController;
 use App\Http\Controllers\PayOrderController;
 use Illuminate\Support\Facades\Response;
@@ -32,6 +33,8 @@ Route::get('/polymorphic-relationships', [Controller::class, 'polymorphic_relati
 Route::get('/facades', [Controller::class, 'facade'])->name('facade.index');
 Route::get('/macros', [Controller::class, 'macros'])->name('macros.index');
 Route::get('/pipeline', [Controller::class, 'pipe'])->name('pipe.index');
+Route::get('/rp', [Controller::class, 'rp'])->name('rp.index');
+
 
 
 
@@ -95,3 +98,9 @@ Route::get('/macros/mixin', function () {
 # -- - - -- - - -
 
 Route::get('/blogs', [BlogController::class, 'index'])->name('blogs.index');
+
+
+
+Route::get('/customers', [CustomerController::class, 'index'])->name('cs.index');
+
+Route::get('/customers/{customerId}', [CustomerController::class, 'show'])->name('cs.show');

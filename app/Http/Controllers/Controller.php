@@ -47,4 +47,9 @@ class Controller extends BaseController
     {
         return view('pipeline.index');
     }
+
+    public function rp()
+    {
+        return view('rp.index');
+    }
 }

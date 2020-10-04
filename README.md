@@ -1,3 +1,11 @@
+# Solid Design Principle
+
+1. Single Responsibility Principle
+2. Open/Closed Principle
+3. Liskov Substitution Principle
+4. Interface Segregation Principle
+5. Dependency Inversion Principle
+
 # UI
 
 ```cmd
@@ -3217,5 +3225,228 @@ public static function allBlogPost()
 ![](markdowns/42.png)
 
 ---
+
+---
+
+# **Repository Pattern**
+
+---
+
+```cmd
+~$ php artisan make:model Customer -a
+```
+
+`customers` migration
+
+```php
+Schema::create('customers', function (Blueprint $table) {
+    $table->id();
+    $table->unsignedBigInteger('user_id');
+    $table->string('name');
+    $table->timestamp('contacted_at')->nullable();
+    $table->unsignedSmallInteger('active')->index();
+    $table->timestamps();
+
+    $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+});
+```
+
+`CustomerFactory.php`
+
+```php
+public function definition()
+{
+    return [
+        'user_id' => User::factory(),
+        'name' => $this->faker->name,
+        'active' => random_int(0, 1),
+    ];
+}
+```
+
+Now run the Seeder [We don't use DataBase Seeder now.]
+
+```cmd
+~$ php artisan tinker
+~$ App\Models\Customer::factory(100)->create()
+```
+
+`web.php`
+
+```php
+Route::get('/customers', [CustomerController::class, 'index'])->name('cs.index');
+```
+
+## Without Repository
+
+### Get all the customer info
+
+`CustomerController.php`
+
+```php
+public function index()
+{
+    $customers = Customer::all();
+
+    return $customers;
+}
+```
+
+### get customer info order by name
+
+`CustomerController.php`
+
+```php
+public function index()
+{
+    $customers = Customer::orderBy('name')
+            ->get();
+
+    return $customers;
+}
+```
+
+### get customer info order by name and who are active
+
+`CustomerController.php`
+
+```php
+public function index()
+{
+    $customers = Customer::orderBy('name')
+            ->where('active', 1)
+            ->get();
+
+    return $customers;
+}
+```
+
+### get customers info with users info
+
+`Customer.php`
+
+```php
+public function user()
+{
+    return $this->belongsTo(User::class);
+}
+```
+
+`CustomerController.php`
+
+```php
+public function index()
+{
+    $customers = Customer::orderBy('name')
+            ->where('active', 1)
+            ->with('user')
+            ->get();
+
+    return $customers;
+}
+```
+
+## Format these
+
+`CustomerController.php`
+
+```php
+public function index()
+{
+    $customers = Customer::orderBy('name')
+            ->where('active', 1)
+            ->with('user')
+            ->get()
+            ->map(function ($customer) {
+                return [
+                    'customer_id' => $customer->id,
+                    'name' => $customer->name,
+                    'created_by' => $customer->user->email,
+                    'last_updated' => $customer->updated_at->diffForHumans(),
+                ];
+            });
+
+    return $customers;
+}
+```
+
+## Then What is the problem without Repository pattern?
+
+-   The query is made with `elequent orm`. If tommorrow I change the database, then whole query should be change.
+
+`App\Repositories\CustomerRepository.php`
+
+```php
+<?php
+
+namespace App\Repositories;
+
+use App\Models\Customer;
+
+class CustomerRepository
+{
+    public function all()
+    {
+        return Customer::orderBy('name')
+            ->where('active', 1)
+            ->with('user')
+            ->get()
+            ->map(function ($customer) {
+                return [
+                    'customer_id' => $customer->id,
+                    'name' => $customer->name,
+                    'created_by' => $customer->user->email,
+                    'last_updated' => $customer->updated_at->diffForHumans(),
+                ];
+            });
+    }
+}
+```
+
+`CustomerController.php`
+
+```php
+private $customerRepository;
+
+public function __construct(CustomerRepository $customerRepository)
+{
+    $this->customerRepository = $customerRepository;
+}
+
+public function index()
+{
+    $customers = $this->customerRepository->all();
+    return $customers;
+}
+```
+
+Same output as before
+
+---
+
+## Fetch a customer by id
+
+`CustomerRepository.php`
+
+```php
+public function findById($customerId)
+{
+    return Customer::where('id', $customerId)
+        ->where('active', 1)
+        ->with('user')
+        ->firstOrFail();
+}
+```
+
+`CustomerController.php`
+
+```php
+public function show($customerId)
+{
+    $customer = $this->customerRepository->findById($customerId);
+
+    return $customer;
+}
+```
 
 ---
