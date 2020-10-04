@@ -3449,4 +3449,349 @@ public function show($customerId)
 }
 ```
 
+## Clean Version of Repository Pattern
+
+`CustomerRepository.php`
+
+```php
+<?php
+
+namespace App\Repositories;
+
+use App\Models\Customer;
+
+
+class CustomerRepository
+{
+    public function all()
+    {
+        return Customer::orderBy('name')
+            ->where('active', 1)
+            ->with('user')
+            ->get()
+            ->map(function ($customer) {
+                return $this->format($customer);
+            });
+    }
+
+    public function findById($customerId)
+    {
+        $customer = Customer::where('id', $customerId)
+            ->where('active', 1)
+            ->with('user')
+            ->firstOrFail();
+
+        return $this->format($customer);
+    }
+
+    protected function format($customer)
+    {
+        return [
+            'customer_id' => $customer->id,
+            'name' => $customer->name,
+            'created_by' => $customer->user->email,
+            'last_updated' => $customer->updated_at->diffForHumans(),
+        ];
+    }
+}
+```
+
+`CustomerController.php`
+
+```php
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Customer;
+use App\Repositories\CustomerRepository;
+use Illuminate\Http\Request;
+
+class CustomerController extends Controller
+{
+    private $customerRepository;
+
+    public function __construct(CustomerRepository $customerRepository)
+    {
+        $this->customerRepository = $customerRepository;
+    }
+
+    public function index()
+    {
+        $customers = $this->customerRepository->all();
+
+        return $customers;
+    }
+
+
+    public function show($customerId)
+    {
+        $customer = $this->customerRepository->findById($customerId);
+
+        return $customer;
+    }
+}
+```
+
+## Clean Version of Repository Pattern using Higer Order
+
+`Customer.php`
+
+```php
+public function format()
+{
+    return [
+        'customer_id' => $this->id,
+        'name' => $this->name,
+        'created_by' => $this->user->email,
+        'last_updated' => $this->updated_at->diffForHumans(),
+    ];
+}
+```
+
+`CustomerRepository.php`
+
+```php
+<?php
+
+namespace App\Repositories;
+
+use App\Models\Customer;
+
+
+class CustomerRepository
+{
+    public function all()
+    {
+        return Customer::orderBy('name')
+            ->where('active', 1)
+            ->with('user')
+            ->get()
+            ->map(function ($customer) {
+                return $customer->format();
+            });
+    }
+    public function findById($customerId)
+    {
+        $customer = Customer::where('id', $customerId)
+            ->where('active', 1)
+            ->with('user')
+            ->firstOrFail();
+
+        return $customer->format();
+    }
+}
+```
+
+`CustomerController.php`
+
+```php
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Customer;
+use App\Repositories\CustomerRepository;
+use Illuminate\Http\Request;
+
+class CustomerController extends Controller
+{
+    private $customerRepository;
+
+    public function __construct(CustomerRepository $customerRepository)
+    {
+        $this->customerRepository = $customerRepository;
+    }
+
+    public function index()
+    {
+        $customers = $this->customerRepository->all();
+
+        return $customers;
+    }
+
+    public function show($customerId)
+    {
+        $customer = $this->customerRepository->findById($customerId);
+
+        return $customer;
+    }
+}
+```
+
+## Clean Version of Repository Pattern using Higer Order 2nd Version
+
+`CustomerRepository.php`
+
+```php
+<?php
+
+namespace App\Repositories;
+
+use App\Models\Customer;
+
+
+class CustomerRepository
+{
+    public function all()
+    {
+        return Customer::orderBy('name')
+            ->where('active', 1)
+            ->with('user')
+            ->get()
+            ->map->format();
+    }
+
+
+    public function findById($customerId)
+    {
+        return Customer::where('id', $customerId)
+            ->where('active', 1)
+            ->with('user')
+            ->firstOrFail()->format();
+    }
+}
+```
+
+---
+
+## Clean Version of Repository Pattern using Higer Order and Interface Version
+
+Creating an `Interface`
+
+`CustomerRepositoryInterface.php`
+
+```php
+<?php
+namespace App\Repositories;
+
+interface CustomerRepositoryInterface
+{
+    public function all();
+
+    public function findById($customerId);
+}
+```
+
+`CustomerRepository.php`
+
+```php
+<?php
+namespace App\Repositories;
+
+use App\Models\Customer;
+
+
+class CustomerRepository implements CustomerRepositoryInterface
+{
+    public function all()
+    {
+        return Customer::orderBy('name')
+            ->where('active', 1)
+            ->with('user')
+            ->get()
+            ->map->format();
+    }
+
+
+    public function findById($customerId)
+    {
+        return Customer::where('id', $customerId)
+            ->where('active', 1)
+            ->with('user')
+            ->firstOrFail()->format();
+    }
+}
+```
+
+`CustomerController.php`
+
+```php
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Repositories\CustomerRepositoryInterface;
+
+class CustomerController extends Controller
+{
+    private $customerRepository;
+
+    public function __construct(CustomerRepositoryInterface $customerRepository)
+    {
+        $this->customerRepository = $customerRepository;
+    }
+
+    public function index()
+    {
+        $customers = $this->customerRepository->all();
+
+        return $customers;
+    }
+
+
+    public function show($customerId)
+    {
+        $customer = $this->customerRepository->findById($customerId);
+
+        return $customer;
+    }
+}
+```
+
+Create a brand new `Provider`
+
+```cmd
+~$ php artisan make:provider RepositoriesServiceProvider
+```
+
+`RepositoriesServiceProvider.php`
+
+```php
+<?php
+
+namespace App\Providers;
+
+use App\Repositories\CustomerRepository;
+use App\Repositories\CustomerRepositoryInterface;
+use Illuminate\Support\ServiceProvider;
+
+class RepositoriesServiceProvider extends ServiceProvider
+{
+    /**
+     * Register services.
+     *
+     * @return void
+     */
+    public function register()
+    {
+        //
+    }
+
+    /**
+     * Bootstrap services.
+     *
+     * @return void
+     */
+    public function boot()
+    {
+        $this->app->bind(CustomerRepositoryInterface::class, CustomerRepository::class);
+    }
+}
+```
+
+Add the **Service Provider** to the `providers` array inside `app.php` file
+
+`app.php`
+
+```php
+'providers' => [
+        App\Providers\RepositoriesServiceProvider::class,
+    ]
+```
+
+-   **Note:** The Repository Pattern is a common refactor that you may encounter in large Laravel applications. While it is not ideal for small to medium projects, it's a perfect solution for those applications that need an abstraction of the data layer.
+
+---
+
 ---
