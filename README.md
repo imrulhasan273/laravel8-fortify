@@ -3374,6 +3374,9 @@ public function index()
 
 -   The query is made with `elequent orm`. If tommorrow I change the database, then whole query should be change.
 
+## Using Repository Pattern
+
+
 `App\Repositories\CustomerRepository.php`
 
 ```php
