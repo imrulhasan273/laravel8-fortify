@@ -52,4 +52,9 @@ class Controller extends BaseController
     {
         return view('rp.index');
     }
+
+    public function lazy()
+    {
+        return view('lazy.index');
+    }
 }

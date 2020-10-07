@@ -65,7 +65,7 @@
                     <a href="{{route('macros.index')}}" type="a" class="btn btn-primary">Macros</a>
                     <a href="{{route('pipe.index')}}" type="a" class="btn btn-secondary">Pipeline</a>
                     <a  href="{{route('rp.index')}}" type="a" class="btn btn-success">Repository Pattern</a>
-                    <a  href="" type="a" class="btn btn-danger">Danger</a>
+                    <a  href="{{route('lazy.index')}}" type="a" class="btn btn-danger">Lazy Collections & PHP Generator</a>
                     <a  href="" type="a" class="btn btn-warning">Warning</a>
                     <a  href="" type="a" class="btn btn-info">Info</a>
                     <a  href="" type="a" class="btn btn-light">Light</a>

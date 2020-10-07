@@ -17,7 +17,9 @@ use App\Http\Controllers\ChannelController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\SessionController;
 use App\Http\Controllers\PayOrderController;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Response;
+use Illuminate\Support\LazyCollection;
 
 Route::get('/', function () {
     return view('welcome');
@@ -34,6 +36,8 @@ Route::get('/facades', [Controller::class, 'facade'])->name('facade.index');
 Route::get('/macros', [Controller::class, 'macros'])->name('macros.index');
 Route::get('/pipeline', [Controller::class, 'pipe'])->name('pipe.index');
 Route::get('/rp', [Controller::class, 'rp'])->name('rp.index');
+Route::get('/lazy', [Controller::class, 'lazy'])->name('lazy.index');
+
 
 
 
@@ -104,3 +108,137 @@ Route::get('/blogs', [BlogController::class, 'index'])->name('blogs.index');
 Route::get('/customers', [CustomerController::class, 'index'])->name('cs.index');
 
 Route::get('/customers/{customerId}', [CustomerController::class, 'show'])->name('cs.show');
+
+
+# ------ lazy collection
+
+// example 1
+Route::get('/lazy/example1', function () {
+    $collection = Collection::times(10000000)
+        ->map(function ($number) {
+            return pow(2, $number);
+        })
+        ->all();
+
+    return 'done';
+})->name('lazy.exp1');
+
+// example 2
+Route::get('/lazy/example2', function () {
+    $collection = LazyCollection::times(10000000)
+        ->map(function ($number) {
+            return pow(2, $number);
+        })
+        ->all();
+
+    return 'done';
+})->name('lazy.exp2');
+
+Route::get('/generator/example1', function () {
+    function happyFunction($string)
+    {
+        return $string;
+    }
+    return happyFunction('Super Happy');
+})->name('gen.exp1');
+
+
+Route::get('/generator/example2', function () {
+    function happyFunction2($string)
+    {
+        yield $string;
+    }
+    return get_class(happyFunction2('Super Happy'));
+})->name('gen.exp2');
+
+Route::get('/generator/example3', function () {
+    function happyFunction3($string)
+    {
+        yield $string;
+    }
+    return get_class_methods(happyFunction3('Super Happy'));
+})->name('gen.exp3');
+
+
+Route::get('/generator/example4', function () {
+    function happyFunction4($string)
+    {
+        yield $string;
+    }
+    return happyFunction4('Super Happy')->current();
+})->name('gen.exp4');
+
+Route::get('/generator/example5', function () {
+    function happyFunction5()
+    {
+        dump('One Start');
+        yield 'One';
+        dump('One End');
+
+        dump('Two Start');
+        yield 'Two';
+        dump('Two End');
+
+        dump('Three Start');
+        yield 'Three';
+        dump('Three End');
+    }
+    return happyFunction5()->current();
+})->name('gen.exp5');
+
+
+//--- --- --- ---
+Route::get('/generator/example6', function () {
+    function happyFunction6($strings)
+    {
+        foreach ($strings as $string) {
+            dump('Start ' . $string);
+            yield $string;
+            dump('End ' . $string);
+        }
+    }
+
+    foreach (happyFunction6(['One', 'Two', 'Three']) as $result) {
+        dump($result);
+    }
+})->name('gen.exp6');
+
+
+Route::get('/generator/example7', function () {
+
+    function notHappyFunction7($number)
+    {
+        $return = [];
+
+        for ($i = 1; $i < $number; $i++) {
+            $return[] = $i;
+        }
+
+        return $return;
+    }
+
+    foreach (notHappyFunction7(100000000) as $number) {
+
+        if ($number % 1000 == 0) {
+            dump('Hello');
+        }
+    }
+})->name('gen.exp7');
+
+
+
+Route::get('/generator/example8', function () {
+    function HappyFunction8($number)
+    {
+        for ($i = 1; $i < $number; $i++) {
+            yield $i;
+        }
+    }
+
+    foreach (HappyFunction8(100000000) as $number) {
+
+        if ($number % 1000 == 0) {
+            dump('Hello');
+        }
+    }
+})->name('gen.exp8');

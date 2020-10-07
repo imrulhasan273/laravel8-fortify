@@ -3795,3 +3795,433 @@ Add the **Service Provider** to the `providers` array inside `app.php` file
 ---
 
 ---
+
+# **Lazy Collections & PHP Generator**
+
+# Lazy Collections
+
+`web.php`
+
+```php
+// example 1
+Route::get('/lazy/example1', function () {
+    $collection = Collection::times(10000000)
+        ->map(function ($number) {
+            return pow(2, $number);
+        })
+        ->all();
+
+    return 'done';
+})->name('lazy.exp1');
+```
+
+> Can not run this operation for memory limitation
+
+```php
+// example 2
+Route::get('/lazy/example2', function () {
+    $collection = LazyCollection::times(10000000)
+        ->map(function ($number) {
+            return pow(2, $number);
+        })
+        ->all();
+
+    return 'done';
+})->name('lazy.exp2');
+```
+
+> Can run the same operation with same threshold using `LazyCollection`.
+
+-   One thing to remember, you can fetch a **Collection** or **LazyCollection**
+    -   For **Collection**
+        -   `User::all()`
+    -   For **LazyCollection**
+        -   `User::cursor()`
+
+# PHP Generator
+
+## Without Generator
+
+```php
+Route::get('/generator/example1', function () {
+    function happyFunction($string)
+    {
+        return $string;
+    }
+    return happyFunction('Super Happy');
+})->name('gen.exp1');
+```
+
+-   Generator don't use **return** statement.
+-   Generator uses **yield**
+
+### get_class
+
+```php
+Route::get('/generator/example2', function () {
+    function happyFunction2($string)
+    {
+        yield $string;
+    }
+    return get_class(happyFunction2('Super Happy'));
+})->name('gen.exp2');
+```
+
+### Output
+
+`Generator`
+
+### get_class_method
+
+```php
+Route::get('/generator/example3', function () {
+    function happyFunction3($string)
+    {
+        yield $string;
+    }
+    return get_class_methods(happyFunction3('Super Happy'));
+})->name('gen.exp3');
+```
+
+### Output
+
+`["rewind","valid","current","key","next","send","throw","getReturn"]`
+
+-   So **get_class_methods** has these methods.
+
+-   So think of a generator like a `video player`. As it has something like `currenet`, `next`, `send` etc.
+-   Difference concept from video playes is We don't wath the full movie, instead in every minute it stops and waits for a click on **next** to start again.
+
+---
+
+### current() method
+
+```php
+Route::get('/generator/example4', function () {
+    function happyFunction4($string)
+    {
+        yield $string;
+    }
+    return happyFunction4('Super Happy')->current();
+})->name('gen.exp4');
+```
+
+### Outputs
+
+`Super Happy`
+
+---
+
+Here is another exmaple
+
+```php
+Route::get('/generator/example5', function () {
+    function happyFunction5()
+    {
+        dump('One Start');
+        yield 'One';
+        dump('One End');
+
+        dump('Two Start');
+        yield 'Two';
+        dump('Two End');
+
+        dump('Three Start');
+        yield 'Three';
+        dump('Three End');
+    }
+    return happyFunction5()->current();
+})->name('gen.exp5');
+```
+
+### Output
+
+```php
+"One Start"
+One
+```
+
+---
+
+```php
+Route::get('/generator/example6', function () {
+    function happyFunction6()
+    {
+        dump('One Start');
+        yield 'One';
+        dump('One End');
+
+        dump('Two Start');
+        yield 'Two';
+        dump('Two End');
+
+        dump('Three Start');
+        yield 'Three';
+        dump('Three End');
+    }
+
+    $return = happyFunction6();
+
+    dump($return->current());
+
+    $return->next();
+
+    dump($return->current());
+
+    $return->next();
+
+    dump($return->current());
+
+    $return->next(); # no more yield
+
+    dump($return->current()); # prints null as no more yield
+})->name('gen.exp6');
+```
+
+### Output
+
+```php
+"One Start"
+"One"
+"One End"
+"Two Start"
+"Two"
+"Two End"
+"Three Start"
+"Three"
+"Three End"
+null
+```
+
+-   We can see that in at last `dump($return->current());` prints `null`. Because there is not more `yield` so it prints `null`.
+
+-   So its good idea to use `foreach` loop to excape the `null` value.
+
+---
+
+Using **foreach**
+
+```php
+Route::get('/generator/example6', function () {
+    function happyFunction6()
+    {
+        dump('One Start');
+        yield 'One';
+        dump('One End');
+
+        dump('Two Start');
+        yield 'Two';
+        dump('Two End');
+
+        dump('Three Start');
+        yield 'Three';
+        dump('Three End');
+    }
+
+    foreach (happyFunction6() as $result) {
+        dump($result);
+    }
+})->name('gen.exp6');
+```
+
+### Output
+
+```php
+"One Start"
+"One"
+"One End"
+"Two Start"
+"Two"
+"Two End"
+"Three Start"
+"Three"
+"Three End"
+```
+
+---
+
+```php
+Route::get('/generator/example6', function () {
+    function happyFunction6()
+    {
+        dump('One Start');
+        yield 'One';
+        dump('One End');
+
+        dump('Two Start');
+        yield 'Two';
+        dump('Two End');
+
+        dump('Three Start');
+        yield 'Three';
+        dump('Three End');
+    }
+
+    foreach (happyFunction6() as $result) {
+        if ($result == 'Two') {
+            return;
+        }
+        dump($result);
+    }
+})->name('gen.exp6');
+```
+
+### Output
+
+```php
+"One Start"
+"One"
+"One End"
+"Two Start"
+```
+
+---
+
+More simplified way
+
+```php
+Route::get('/generator/example6', function () {
+    function happyFunction6($strings)
+    {
+        foreach ($strings as $string) {
+            dump('Start ' . $string);
+            yield $string;
+            dump('End ' . $string);
+        }
+    }
+
+    foreach (happyFunction6(['One', 'Two', 'Three']) as $result) {
+        dump($result);
+    }
+})->name('gen.exp6');
+```
+
+### Output
+
+```php
+"Start One"
+"One"
+"End One"
+"Start Two"
+"Two"
+"End Two"
+"Start Three"
+"Three"
+"End Three"
+```
+
+---
+
+---
+
+### Here is an another example without `Generator`
+
+```php
+Route::get('/generator/example7', function () {
+
+    function notHappyFunction7($number)
+    {
+        $return = [];
+
+        for ($i = 1; $i < $number; $i++) {
+            $return[] = $i;
+        }
+
+        return $return;
+    }
+
+    foreach (notHappyFunction7(10000) as $number) {
+
+        if ($number % 1000 == 0) {
+            dump('Hello');
+        }
+    }
+})->name('gen.exp7');
+```
+
+### Output
+
+```php
+"Hello"
+"Hello"
+"Hello"
+"Hello"
+"Hello"
+"Hello"
+"Hello"
+"Hello"
+"Hello"
+```
+
+runs perfectly
+
+If we pass a large numner
+
+```php
+foreach (notHappyFunction7(100000000) as $number) {
+    if ($number % 1000 == 0) {
+        dump('Hello');
+    }
+}
+```
+
+### Output
+
+`Allowed memory siz e of 2147483648 bytes exhausted (tried to allocate 2147483656 bytes)`
+
+-   So could not run the program after passing `100000000`
+
+---
+
+### this same example using `Generator`
+
+```php
+Route::get('/generator/example8', function () {
+    function HappyFunction8($number)
+    {
+        for ($i = 1; $i < $number; $i++) {
+            yield $i;
+        }
+    }
+
+    foreach (HappyFunction8(100000000) as $number) {
+
+        if ($number % 1000 == 0) {
+            dump('Hello');
+        }
+    }
+})->name('gen.exp8');
+```
+
+### Output
+
+```php
+"Hello"
+"Hello"
+"Hello"
+"Hello"
+"Hello"
+"Hello"
+"Hello"
+"Hello"
+"Hello"
+......
+......
+......
+......
+"Hello"
+"Hello"
+"Hello"
+......
+......
+```
+
+-   So could run the program after passing `100000000` Using Generator.
+
+---
+
+---
+
+# **Soft Delete**
+
+---
