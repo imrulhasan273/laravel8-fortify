@@ -3376,7 +3376,6 @@ public function index()
 
 ## Using Repository Pattern
 
-
 `App\Repositories\CustomerRepository.php`
 
 ```php
@@ -4226,5 +4225,251 @@ Route::get('/generator/example8', function () {
 ---
 
 # **Soft Delete**
+
+---
+
+```cmd
+~$ php artisan make:model Note -a
+```
+
+`Model`
+
+```php
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Note extends Model
+{
+    use HasFactory;
+    protected $guarded = [];
+}
+```
+
+`Migrations` [notes]
+
+```php
+Schema::create('notes', function (Blueprint $table) {
+    $table->id();
+    $table->string('title');
+    $table->text('body');
+    $table->timestamps();
+});
+```
+
+`Factory`
+
+```php
+public function definition()
+{
+    return [
+        'title' => $this->faker->sentence,
+        'body' => $this->faker->paragraph,
+    ];
+}
+```
+
+```cmd
+~$ php artisan tinker
+~$ App\Models\Note::factory(5)->create()
+```
+
+---
+
+`web.php`
+
+```php
+Route::get('/notes', [NoteController::class, 'index'])->name('notes.index');
+```
+
+`NoteController.php`
+
+```php
+public function index()
+{
+    return Note::all();
+}
+```
+
+Add new column to the existing table `notes`
+
+```cmd
+~$ php artisan make:migration add_deleted_at_column_to_notes --table notes
+```
+
+---
+
+`add_deleted_at_column_to_notes` migration for `notes`
+
+```php
+public function up()
+{
+    Schema::table('notes', function (Blueprint $table) {
+        $table->timestamp('deleted_at')->nullable();
+    });
+}
+
+public function down()
+{
+    Schema::table('notes', function (Blueprint $table) {
+        $table->dropColumn('deleted_at');
+    });
+}
+```
+
+```cmd
+~$ php artisan migrate
+```
+
+`Note.php`
+
+```php
+class Note extends Model
+{
+    use HasFactory;
+    use SoftDeletes;
+    protected $guarded = [];
+}
+```
+
+-   `use SoftDeletes;`
+
+## Now lets soft delete Note of ID=1
+
+## Tinker
+
+```cmd
+~$ php artisan tinker
+```
+
+## Commands
+
+Fetch the Note of ID=1
+
+```php
+$note = App\Models\Note::find(1);
+```
+
+### Output
+
+```php
+App\Models\Note {#4361
+     id: 1,
+     title: "Vero perspiciatis quisquam voluptas quisquam voluptas.",
+     body: "Quia eos velit autem architecto aspernatur voluptatibus. Recusandae quia quae vitae incidunt esse quia qui et. Omnis quasi esse expedita explicabo. Corrupti adipisci quam vitae quibusdam doloribus.",
+     created_at: "2020-10-14 16:25:41",
+     updated_at: "2020-10-14 16:25:41",
+     deleted_at: null,
+}
+```
+
+Normal Delete
+
+```php
+$note->delete();
+```
+
+### Output
+
+```php
+=> true
+```
+
+> So now we can see that the `Note` of id=1 is not fetching while `$notes = Note::all()`. But it is still in the Database.
+
+Fetch the note of id=1
+
+```php
+$note = App\Models\Note::find(1);
+```
+
+### Output
+
+```php
+=> null
+```
+
+-   It shows that the data null.
+
+Another check
+
+```php
+$note = App\Models\Note::where('id',1)->get();
+```
+
+### Output
+
+```php
+=> Illuminate\Database\Eloquent\Collection {#4359
+     all: [],
+}
+```
+
+-   Null
+
+> So now the magic......
+
+```php
+$note = App\Models\Note::where('id',1)->withTrashed()->get();
+```
+
+### Output
+
+```php
+Illuminate\Database\Eloquent\Collection {#4365
+     all: [
+       App\Models\Note {#4366
+         id: 1,
+         title: "Vero perspiciatis quisquam voluptas quisquam voluptas.",
+         body: "Quia eos velit autem architecto aspernatur voluptatibus. Recusandae quia quae vitae incidunt esse quia qui et. Omnis quasi esse expedita explicabo. Corrupti adipisci quam vitae quibusdam doloribus.",
+         created_at: "2020-10-14 16:25:41",
+         updated_at: "2020-10-14 16:49:13",
+         deleted_at: "2020-10-14 16:49:13",
+       },
+     ],
+}
+```
+
+-   So we find it the `note` of id=1 which was previously deleted.
+
+-   But the notes is not appears in the browser.
+
+-   How we bring the record?
+
+```php
+$note = App\Models\Note::where('id',1)->withTrashed()->first();
+```
+
+### Output
+
+```php
+App\Models\Note {#4368
+     id: 1,
+     title: "Vero perspiciatis quisquam voluptas quisquam voluptas.",
+     body: "Quia eos velit autem architecto aspernatur voluptatibus. Recusandae quia quae vitae incidunt esse quia qui et. Omnis quasi esse expedita explicabo. Corrupti adipisci quam vitae quibusdam doloribus.",
+     created_at: "2020-10-14 16:25:41",
+     updated_at: "2020-10-14 16:49:13",
+     deleted_at: "2020-10-14 16:49:13",
+}
+```
+
+```php
+$note->restore();
+```
+
+### Output
+
+```php
+=> true
+```
+
+-   Now we can see that the deleted records has been restored.
+
+> One more thing to know......
+
+---
 
 ---

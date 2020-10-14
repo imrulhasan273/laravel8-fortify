@@ -57,4 +57,9 @@ class Controller extends BaseController
     {
         return view('lazy.index');
     }
+
+    public function sDelete()
+    {
+        return view('soft.index');
+    }
 }

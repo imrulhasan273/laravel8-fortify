@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Redirect;
 
 use App\Http\Controllers\ChannelController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\NoteController;
 use App\Http\Controllers\SessionController;
 use App\Http\Controllers\PayOrderController;
 use Illuminate\Support\Collection;
@@ -37,6 +38,8 @@ Route::get('/macros', [Controller::class, 'macros'])->name('macros.index');
 Route::get('/pipeline', [Controller::class, 'pipe'])->name('pipe.index');
 Route::get('/rp', [Controller::class, 'rp'])->name('rp.index');
 Route::get('/lazy', [Controller::class, 'lazy'])->name('lazy.index');
+Route::get('/soft-delete', [Controller::class, 'sDelete'])->name('softD.index');
+
 
 
 
@@ -242,3 +245,8 @@ Route::get('/generator/example8', function () {
         }
     }
 })->name('gen.exp8');
+
+
+
+
+Route::get('/notes', [NoteController::class, 'index'])->name('notes.index');
